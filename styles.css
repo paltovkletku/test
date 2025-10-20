@@ -1,14 +1,9 @@
-/* styles.css
-   Простой аккуратный стиль в духе новичка.
-   Шрифт: Courier New. Нежные желто-зеленые тона.
-*/
-
 /* Базовые сбросы (простенько) */
 html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Courier New", Courier, monospace;
+  font-family: "Roboto";
   background: #afe3a4; /* очень светлый салатово-бежевый фон */
   color: #26321f; /* темно-зеленый текст */
   -webkit-font-smoothing: antialiased;
