@@ -159,10 +159,14 @@ function createTaskElement(task) {
   textDiv.textContent = task.title;
   li.appendChild(textDiv);
 
-  // дата
+  // дата / крайний срок
   var meta = document.createElement('div');
   meta.className = 'task-meta';
-  meta.textContent = formatDate(task.date);
+  if (task.date) {
+    meta.textContent = 'Крайний срок: ' + formatDate(task.date);
+  } else {
+    meta.textContent = 'Крайний срок: без даты';
+  }
   li.appendChild(meta);
 
   // кнопки
