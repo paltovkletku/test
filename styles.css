@@ -9,7 +9,7 @@ html, body {
   padding: 0;
   box-sizing: border-box;
   font-family: "Courier New", Courier, monospace;
-  background: #f6f9f3; /* очень светлый салатово-бежевый фон */
+  background: #afe3a4; /* очень светлый салатово-бежевый фон */
   color: #26321f; /* темно-зеленый текст */
   -webkit-font-smoothing: antialiased;
 }
@@ -26,7 +26,7 @@ html, body {
 .card {
   width: 100%;
   max-width: 920px;
-  background: linear-gradient(180deg, #ffffff 0%, #fcffef 100%);
+  background: #ffffff;
   border: 1px solid #e7f0d9;
   border-radius: 10px;
   padding: 18px;
