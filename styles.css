@@ -116,7 +116,7 @@ button.small {
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #eef7e0;
-  background: linear-gradient(180deg, #ffffff 0%, #fbffef 100%);
+  background: #ffffff;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
