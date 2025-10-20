@@ -313,3 +313,29 @@ button.small {
 .modal-buttons button:hover {
   background: #f0ffe6;
 }
+
+
+/* --- Исправление вылезающих полей на мобильных --- */
+@media (max-width: 640px) {
+  form.form-row {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .form-row input[type="text"],
+  .form-row input[type="date"] {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .form-row button {
+    width: 100%;
+  }
+
+  /* Чтобы карточка точно не растягивалась */
+  .card {
+    overflow: hidden;
+  }
+}
+
