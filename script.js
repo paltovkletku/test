@@ -246,7 +246,6 @@ function createTaskElement(task) {
   // События
   check.addEventListener('click', () => toggleDone(task.id));
   btnDelete.addEventListener('click', () => removeTask(task.id));
-  });
   btnEdit.addEventListener('click', () => openEditDialog(task));
 
   // drag events для визуалки
