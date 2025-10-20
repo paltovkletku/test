@@ -275,19 +275,82 @@ function toggleDone(id) {
   renderTasks();
 }
 
+/* ==========================
+   Простая самодельная модалка
+   ========================== */
+var modalOverlay = document.createElement('div');
+modalOverlay.className = 'modal-overlay';
+modalOverlay.style.display = 'none';
+document.body.appendChild(modalOverlay);
+
+var modalWindow = document.createElement('div');
+modalWindow.className = 'modal-window';
+modalOverlay.appendChild(modalWindow);
+
+var modalTitle = document.createElement('h3');
+modalWindow.appendChild(modalTitle);
+
+var modalContent = document.createElement('div');
+modalContent.className = 'modal-content';
+modalWindow.appendChild(modalContent);
+
+var modalButtons = document.createElement('div');
+modalButtons.className = 'modal-buttons';
+modalWindow.appendChild(modalButtons);
+
+function showModal(title, contentNode, buttons) {
+  modalTitle.textContent = title;
+  modalContent.innerHTML = '';
+  modalContent.appendChild(contentNode);
+  modalButtons.innerHTML = '';
+  buttons.forEach(function(btn) {
+    modalButtons.appendChild(btn);
+  });
+  modalOverlay.style.display = 'flex';
+}
+
+function closeModal() {
+  modalOverlay.style.display = 'none';
+}
+
 // Редактирование задачи
 function openEditDialog(task) {
-  var newTitle = prompt('Изменить название:', task.title);
-  if (newTitle === null) return;
-  var newDate = prompt('Изменить дату (YYYY-MM-DD):', task.date);
-  for (var i = 0; i < tasks.length; i++) {
-    if (tasks[i].id === task.id) {
-      tasks[i].title = newTitle.trim() || task.title;
-      tasks[i].date = newDate || task.date;
-    }
-  }
-  saveTasks();
-  renderTasks();
+  var wrapper = document.createElement('div');
+
+  var lbl1 = document.createElement('label');
+  lbl1.textContent = 'Название:';
+  var input1 = document.createElement('input');
+  input1.type = 'text';
+  input1.value = task.title;
+  input1.style.display = 'block';
+  input1.style.marginBottom = '10px';
+
+  var lbl2 = document.createElement('label');
+  lbl2.textContent = 'Дата (YYYY-MM-DD):';
+  var input2 = document.createElement('input');
+  input2.type = 'date';
+  input2.value = task.date || '';
+
+  wrapper.appendChild(lbl1);
+  wrapper.appendChild(input1);
+  wrapper.appendChild(lbl2);
+  wrapper.appendChild(input2);
+
+  var btnOk = document.createElement('button');
+  btnOk.textContent = 'Сохранить';
+  btnOk.addEventListener('click', function() {
+    task.title = input1.value.trim() || task.title;
+    task.date = input2.value;
+    saveTasks();
+    renderTasks();
+    closeModal();
+  });
+
+  var btnCancel = document.createElement('button');
+  btnCancel.textContent = 'Отмена';
+  btnCancel.addEventListener('click', closeModal);
+
+  showModal('Изменение задачи', wrapper, [btnOk, btnCancel]);
 }
 
 // drag & drop перестановка
@@ -340,12 +403,25 @@ btnSort.addEventListener('click', function() {
   renderTasks();
 });
 
+// Новая версия удаления выполненных через модалку
 btnClearDone.addEventListener('click', function() {
-  if (confirm('Удалить все выполненные задачи?')) {
+  var wrapper = document.createElement('div');
+  wrapper.textContent = 'Удалить все выполненные задачи?';
+
+  var btnYes = document.createElement('button');
+  btnYes.textContent = 'Да';
+  btnYes.addEventListener('click', function() {
     tasks = tasks.filter(t => !t.done);
     saveTasks();
     renderTasks();
-  }
+    closeModal();
+  });
+
+  var btnNo = document.createElement('button');
+  btnNo.textContent = 'Отмена';
+  btnNo.addEventListener('click', closeModal);
+
+  showModal('Подтверждение', wrapper, [btnYes, btnNo]);
 });
 
 // Запуск
