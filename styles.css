@@ -214,34 +214,6 @@ button.small {
   margin-left: auto;
 }
 
-/* адаптивность */
-@media (max-width: 640px) {
-  .card {
-    padding: 12px;
-  }
-  .controls {
-    gap: 6px;
-  }
-  .form-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  input[type="text"], input[type="date"], select, button {
-    width: 100%;
-  }
-  .task-meta {
-    display: block;
-    margin-left: 0;
-    margin-top: 6px;
-    font-size: 12px;
-  }
-  .task-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-}
-
 /* === Простая модалка === */
 .modal-overlay {
   position: fixed;
@@ -315,27 +287,38 @@ button.small {
 }
 
 
-/* --- Исправление вылезающих полей на мобильных --- */
 @media (max-width: 640px) {
-  form.form-row {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .form-row input[type="text"],
-  .form-row input[type="date"] {
-    max-width: 100%;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .form-row button {
-    width: 100%;
-  }
-
-  /* Чтобы карточка точно не растягивалась */
   .card {
-    overflow: hidden;
+    padding: 12px;
+    overflow: hidden; /* из второго блока */
+  }
+  .controls {
+    gap: 6px;
+  }
+  .form-row {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  input[type="text"],
+  input[type="date"],
+  select,
+  button {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .task-meta {
+    display: block;
+    margin-left: 0;
+    margin-top: 6px;
+    font-size: 12px;
+  }
+  .task-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 
