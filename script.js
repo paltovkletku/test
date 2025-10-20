@@ -358,24 +358,45 @@ function openEditDialog(task) {
 }
 
 // drag & drop перестановка
+// dragover — вставка на место, куда тащим
 list.addEventListener('dragover', function(e) {
   e.preventDefault();
+  const draggingEl = list.querySelector('.dragging');
+  const afterElement = getDragAfterElement(list, e.clientY);
+  if (afterElement == null) {
+    list.appendChild(draggingEl);
+  } else {
+    list.insertBefore(draggingEl, afterElement);
+  }
 });
+
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.task-item:not(.dragging)')];
+
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// drop — обновляем массив tasks по новому порядку
 list.addEventListener('drop', function(e) {
   e.preventDefault();
-  var draggedId = e.dataTransfer.getData('text/plain');
-  var targetLi = e.target.closest('li.task-item');
-  if (!targetLi) return;
-  var targetId = targetLi.dataset.taskId;
-
-  var from = tasks.findIndex(t => t.id === draggedId);
-  var to = tasks.findIndex(t => t.id === targetId);
-  var moved = tasks.splice(from, 1)[0];
-  tasks.splice(to, 0, moved);
-
+  const newTasks = [];
+  list.querySelectorAll('.task-item').forEach(li => {
+    const task = tasks.find(t => t.id === li.dataset.taskId);
+    if (task) newTasks.push(task);
+  });
+  tasks = newTasks;
   saveTasks();
   renderTasks();
 });
+
 
 // Слушатели
 form.addEventListener('submit', function(e) {
