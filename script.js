@@ -108,11 +108,11 @@ function createTaskElement(task){
   block.appendChild(date);
 
   var btnEdit = document.createElement('button');
-  btnEdit.textContent = '✎';
+  btnEdit.textContent = 'Изменить';
   li.appendChild(btnEdit);
 
   var btnDel = document.createElement('button');
-  btnDel.textContent = '✕';
+  btnDel.textContent = 'Удалить';
   li.appendChild(btnDel);
 
   check.onclick = () => toggleDone(task.id);
