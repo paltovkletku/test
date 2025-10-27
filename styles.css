@@ -236,7 +236,9 @@ button.small {
 
 /* === Дополнительно для модального окна === */
 .modal-input {
+  box-sizing: border-box; /* Включаем padding и border в ширину */
   width: 100%;
+  max-width: 100%;      /* Ограничение максимальной ширины */
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid #b9d8aa;
@@ -244,12 +246,15 @@ button.small {
   font-size: 15px;
 }
 
-.modal-input:focus {
-  border-color: #8dc372;
-  box-shadow: 0 0 0 3px rgba(122,205,113,0.25);
+.modal-window {
+  box-sizing: border-box;  /* Чтобы padding не увеличивал ширину окна */
+  padding: 18px;
+  width: 90%;
+  max-width: 350px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 22px rgba(20, 40, 20, 0.25);
+  overflow: hidden;       /* Обрезаем все элементы, которые торчат */
 }
 
-.modal-buttons button {
-  min-width: 80px;
-}
 
