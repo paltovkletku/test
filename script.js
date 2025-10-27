@@ -1,17 +1,11 @@
-// === Простое ToDo-приложение на чистом JavaScript ===
-
-// ключ для хранения данных в localStorage
 const LOCAL_STORAGE_KEY = 'todo_lab_v1';
 
-// массив задач
 let taskList = [];
 
-// состояние фильтров и сортировки
 let sortAscending = true;
 let currentFilter = 'all';
 let searchText = '';
 
-// ===== Работа с localStorage =====
 function loadTasks() {
   const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
   taskList = saved ? JSON.parse(saved) : [];
@@ -21,22 +15,19 @@ function saveTasks() {
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(taskList));
 }
 
-// простая генерация ID
 function generateTaskId() {
   return Date.now() + Math.random().toString().substring(2, 5);
 }
 
-// ===== Создание интерфейса =====
+// интерфейс
 const container = document.createElement('div');
 container.className = 'container';
 document.body.appendChild(container);
 
-// заголовок
 const pageTitle = document.createElement('h1');
 pageTitle.textContent = 'Список дел';
 container.appendChild(pageTitle);
 
-// === Панель управления ===
 const controlPanel = document.createElement('div');
 controlPanel.className = 'controls';
 container.appendChild(controlPanel);
@@ -62,7 +53,6 @@ const sortButton = document.createElement('button');
 sortButton.textContent = 'Сортировать ↑';
 controlPanel.appendChild(sortButton);
 
-// === Форма добавления задачи ===
 const addForm = document.createElement('form');
 addForm.className = 'form-row';
 container.appendChild(addForm);
@@ -81,18 +71,15 @@ addTaskButton.type = 'submit';
 addTaskButton.textContent = 'Добавить';
 addForm.appendChild(addTaskButton);
 
-// === Список задач ===
 const taskListElement = document.createElement('ul');
 taskListElement.className = 'list';
 container.appendChild(taskListElement);
 
-// === Блок “нет задач” ===
 const emptyMessage = document.createElement('div');
 emptyMessage.className = 'empty-note';
 emptyMessage.textContent = 'Нет задач...';
 container.appendChild(emptyMessage);
 
-// ====== Создание одного элемента задачи ======
 function buildTaskItem(task) {
   const li = document.createElement('li');
   li.className = 'task-item';
@@ -127,7 +114,6 @@ function buildTaskItem(task) {
   deleteButton.textContent = 'Удалить';
   li.appendChild(deleteButton);
 
-  // события
   checkButton.onclick = () => toggleTaskDone(task.id);
   deleteButton.onclick = () => deleteTask(task.id);
   editButton.onclick = () => openEditModal(task);
@@ -135,27 +121,21 @@ function buildTaskItem(task) {
   return li;
 }
 
-// ====== Отрисовка всего списка ======
 function updateTaskList() {
-  // очищаем список
   while (taskListElement.firstChild) {
     taskListElement.removeChild(taskListElement.firstChild);
   }
 
   let visibleTasks = taskList.slice();
-
-  // поиск
   if (searchText) {
     visibleTasks = visibleTasks.filter(t =>
       t.title.toLowerCase().includes(searchText.toLowerCase())
     );
   }
 
-  // фильтрация
   if (currentFilter === 'active') visibleTasks = visibleTasks.filter(t => !t.done);
   if (currentFilter === 'done') visibleTasks = visibleTasks.filter(t => t.done);
 
-  // сортировка по дате
   visibleTasks.sort((a, b) => {
     if (!a.date) return 1;
     if (!b.date) return -1;
@@ -165,11 +145,9 @@ function updateTaskList() {
 
   emptyMessage.style.display = visibleTasks.length === 0 ? 'block' : 'none';
 
-  // добавляем элементы в DOM
   visibleTasks.forEach(task => taskListElement.appendChild(buildTaskItem(task)));
 }
 
-// ====== Логика работы ======
 function addTask(title, date) {
   taskList.push({
     id: generateTaskId(),
@@ -196,7 +174,6 @@ function toggleTaskDone(id) {
   }
 }
 
-// ====== Модальное окно редактирования ======
 const modalOverlay = document.createElement('div');
 modalOverlay.className = 'modal-overlay';
 
@@ -265,7 +242,6 @@ modalSaveButton.onclick = function () {
   closeEditModal();
 };
 
-// ====== Обработчики ======
 addForm.onsubmit = e => {
   e.preventDefault();
   addTask(newTaskInput.value, newTaskDate.value);
@@ -290,7 +266,6 @@ sortButton.onclick = () => {
   updateTaskList();
 };
 
-// ====== Drag & Drop ======
 taskListElement.addEventListener('dragstart', e => {
   e.target.classList.add('dragging');
 });
@@ -315,6 +290,5 @@ taskListElement.addEventListener('dragover', e => {
   taskListElement.insertBefore(dragging, afterElement);
 });
 
-// ====== Запуск ======
 loadTasks();
 updateTaskList();
