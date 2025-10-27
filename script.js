@@ -122,30 +122,47 @@ function buildTaskItem(task) {
 }
 
 function updateTaskList() {
+  // Очищаем список перед перерисовкой
   while (taskListElement.firstChild) {
     taskListElement.removeChild(taskListElement.firstChild);
   }
 
+  // Копируем массив задач, чтобы не трогать оригинал
   let visibleTasks = taskList.slice();
-  if (searchText) {
-    visibleTasks = visibleTasks.filter(t =>
-      t.title.toLowerCase().includes(searchText.toLowerCase())
+
+  // === Поиск ===
+  if (searchText.trim()) {
+    const query = searchText.trim().toLowerCase();
+    visibleTasks = visibleTasks.filter(task =>
+      task.title && task.title.toLowerCase().includes(query)
     );
   }
 
-  if (currentFilter === 'active') visibleTasks = visibleTasks.filter(t => !t.done);
-  if (currentFilter === 'done') visibleTasks = visibleTasks.filter(t => t.done);
+  // === Фильтрация по статусу ===
+  if (currentFilter === 'active') {
+    visibleTasks = visibleTasks.filter(task => !task.done);
+  } else if (currentFilter === 'done') {
+    visibleTasks = visibleTasks.filter(task => task.done);
+  }
 
+  // === Сортировка по дате ===
   visibleTasks.sort((a, b) => {
     if (!a.date) return 1;
     if (!b.date) return -1;
     return a.date.localeCompare(b.date);
   });
-  if (!sortAscending) visibleTasks.reverse();
 
+  if (!sortAscending) {
+    visibleTasks.reverse();
+  }
+
+  // === Сообщение, если задач нет ===
   emptyMessage.style.display = visibleTasks.length === 0 ? 'block' : 'none';
 
-  visibleTasks.forEach(task => taskListElement.appendChild(buildTaskItem(task)));
+  // === Рендерим задачи ===
+  visibleTasks.forEach(task => {
+    taskListElement.appendChild(buildTaskItem(task));
+  });
 }
 
 function addTask(title, date) {
