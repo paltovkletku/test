@@ -1,4 +1,3 @@
-/* Сброс и базовая стилизация */
 html, body {
   margin: 0;
   padding: 0;
@@ -8,7 +7,6 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Контейнер */
 .container {
   width: 100%;
   max-width: 900px;
@@ -19,7 +17,6 @@ html, body {
   gap: 12px;
 }
 
-/* Заголовок */
 .header h1 {
   margin: 0;
   font-size: 26px;
@@ -27,7 +24,6 @@ html, body {
   text-align: center;
 }
 
-/* Панель управления */
 .controls {
   display: flex;
   gap: 8px;
@@ -35,7 +31,6 @@ html, body {
   justify-content: center;
 }
 
-/* Поля ввода */
 input,
 select,
 button {
@@ -65,7 +60,6 @@ input[type="date"] {
   min-width: 0; /* фикс ширины */
 }
 
-/* Кнопки */
 button {
   padding: 10px 14px;
   border: 1px solid #bfe5a6;
@@ -89,7 +83,6 @@ button.small {
   font-size: 13px;
 }
 
-/* Форма */
 .form-row {
   display: flex;
   gap: 8px;
@@ -97,14 +90,12 @@ button.small {
   flex-wrap: wrap;
 }
 
-/* Список задач */
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-/* Элемент задачи */
 .task-item {
   display: flex;
   align-items: center;
@@ -119,13 +110,11 @@ button.small {
   background: #f6ffe9;
 }
 
-/* Выполненная задача */
 .task-item.done .task-title {
   text-decoration: line-through;
   color: #728b64;
 }
 
-/* Чекбокс */
 .checkbox {
   width: 26px;
   height: 26px;
@@ -138,27 +127,23 @@ button.small {
   font-size: 18px;
 }
 
-/* Текст */
 .task-title {
   flex: 1;
   font-size: 15px;
   word-break: break-word;
 }
 
-/* Дата */
 .task-meta {
   font-size: 12px;
   color: #5c704c;
   white-space: nowrap;
 }
 
-/* Кнопки действий */
 .actions {
   display: flex;
   gap: 4px;
 }
 
-/* Пустой список */
 .empty-note {
   text-align: center;
   color: #5c704c;
@@ -166,7 +151,6 @@ button.small {
   font-size: 15px;
 }
 
-/* Подвал */
 .footer {
   display: flex;
   justify-content: space-between;
@@ -176,7 +160,6 @@ button.small {
   font-size: 14px;
 }
 
-/* === Модальное окно === */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -210,7 +193,6 @@ button.small {
   gap: 8px;
 }
 
-/* Адаптив */
 @media (max-width: 600px) {
   input[type="date"] {
     width: 100%;
@@ -234,11 +216,10 @@ button.small {
   }
 }
 
-/* === Дополнительно для модального окна === */
 .modal-input {
-  box-sizing: border-box; /* Включаем padding и border в ширину */
+  box-sizing: border-box;
   width: 100%;
-  max-width: 100%;      /* Ограничение максимальной ширины */
+  max-width: 100%;
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid #b9d8aa;
@@ -247,14 +228,14 @@ button.small {
 }
 
 .modal-window {
-  box-sizing: border-box;  /* Чтобы padding не увеличивал ширину окна */
+  box-sizing: border-box;
   padding: 18px;
   width: 90%;
   max-width: 350px;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 8px 22px rgba(20, 40, 20, 0.25);
-  overflow: hidden;       /* Обрезаем все элементы, которые торчат */
+  overflow: hidden;
 }
 
 
