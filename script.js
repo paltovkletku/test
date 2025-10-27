@@ -1,56 +1,100 @@
-var STORAGE_KEY = 'todo_minimal_v1';
-var tasks = [];
-var sortAsc = true;
-var filterMode = 'all';
-var searchQuery = '';
+// Ключ для localStorage
+var STORAGE_KEY = 'todo_lab_tasks_v1';
 
-function loadTasks(){
-  var saved = localStorage.getItem(STORAGE_KEY);
-  tasks = saved ? JSON.parse(saved) : [];
+// Массив с задачами
+var tasks = [];
+
+// Настройки
+var sortAsc = true; // сортировка по дате
+var filterMode = 'all'; // all | active | done
+var searchQuery = ''; // строка поиска
+
+
+// === Хранение ===
+
+// Загружаем задачи из localStorage (если есть)
+function loadTasks() {
+  var data = localStorage.getItem(STORAGE_KEY);
+  if (data) tasks = JSON.parse(data);
+  else tasks = [];
 }
-function saveTasks(){
+
+// Сохраняем задачи
+function saveTasks() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
-function generateId(){
-  return Date.now() + Math.random().toString().substring(2,5);
+
+// Простая функция для генерации id
+function generateId() {
+  return Date.now().toString() + Math.random().toString().slice(2, 6);
 }
 
-/* UI */
+
+// === Создание структуры страницы ===
+
 var container = document.createElement('div');
 container.className = 'container';
 document.body.appendChild(container);
 
-var title = document.createElement('h1');
-title.textContent = "Список дел";
-container.appendChild(title);
+var card = document.createElement('section');
+card.className = 'card';
+container.appendChild(card);
 
-/* Поиск и фильтры */
+// Заголовок
+var header = document.createElement('header');
+header.className = 'header';
+card.appendChild(header);
+
+var title = document.createElement('h1');
+title.textContent = 'Мой ToDo список';
+header.appendChild(title);
+
+// Панель с управлением
 var controls = document.createElement('div');
 controls.className = 'controls';
-container.appendChild(controls);
+header.appendChild(controls);
 
+// Поиск
 var inputSearch = document.createElement('input');
-inputSearch.placeholder = "Поиск";
+inputSearch.type = 'search';
+inputSearch.placeholder = 'Поиск...';
 controls.appendChild(inputSearch);
 
+// Фильтр
 var selectFilter = document.createElement('select');
-selectFilter.innerHTML = `
-<option value="all">Все</option>
-<option value="active">Активные</option>
-<option value="done">Выполненные</option>`;
+
+var opt1 = document.createElement('option');
+opt1.value = 'all';
+opt1.textContent = 'Все';
+selectFilter.appendChild(opt1);
+
+var opt2 = document.createElement('option');
+opt2.value = 'active';
+opt2.textContent = 'Невыполненные';
+selectFilter.appendChild(opt2);
+
+var opt3 = document.createElement('option');
+opt3.value = 'done';
+opt3.textContent = 'Выполненные';
+selectFilter.appendChild(opt3);
+
 controls.appendChild(selectFilter);
 
+// Кнопка сортировки
 var btnSort = document.createElement('button');
-btnSort.textContent = "Сортировать ↑";
+btnSort.textContent = 'Сортировать ↑';
 controls.appendChild(btnSort);
 
-/* Форма */
+
+// === Форма добавления задачи ===
+
 var form = document.createElement('form');
 form.className = 'form-row';
-container.appendChild(form);
+card.appendChild(form);
 
 var inputTitle = document.createElement('input');
-inputTitle.placeholder = "Новая задача";
+inputTitle.type = 'text';
+inputTitle.placeholder = 'Название задачи';
 inputTitle.required = true;
 form.appendChild(inputTitle);
 
@@ -60,145 +104,359 @@ form.appendChild(inputDate);
 
 var btnAdd = document.createElement('button');
 btnAdd.type = 'submit';
-btnAdd.textContent = "Добавить";
+btnAdd.textContent = 'Добавить';
 form.appendChild(btnAdd);
 
-/* Список */
+
+// === Список задач ===
+
 var list = document.createElement('ul');
 list.className = 'list';
-container.appendChild(list);
+card.appendChild(list);
 
-/* Пусто */
+// Пустое сообщение
 var emptyNote = document.createElement('div');
 emptyNote.className = 'empty-note';
-emptyNote.textContent = "Нет задач...";
-container.appendChild(emptyNote);
+emptyNote.textContent = 'Задач пока нет...';
+card.appendChild(emptyNote);
 
-/* Создание элемента списка */
-function createTaskElement(task){
+
+// === Нижняя панель ===
+
+var footer = document.createElement('footer');
+footer.className = 'footer';
+card.appendChild(footer);
+
+var counter = document.createElement('div');
+counter.textContent = '';
+footer.appendChild(counter);
+
+var btnClearDone = document.createElement('button');
+btnClearDone.textContent = 'Удалить выполненные';
+footer.appendChild(btnClearDone);
+
+
+// === Вспомогательные функции ===
+
+// Формат даты для человека
+function formatDate(dateStr) {
+  if (!dateStr) return 'Без даты';
+  var d = new Date(dateStr);
+  return d.toLocaleDateString();
+}
+
+
+// === Создание элемента задачи ===
+
+function createTaskElement(task) {
   var li = document.createElement('li');
   li.className = 'task-item';
-  if(task.done) li.classList.add('done');
-  li.draggable = true;
-  li.dataset.id = task.id;
+  if (task.done) li.classList.add('done');
+  li.setAttribute('draggable', 'true');
+  li.dataset.taskId = task.id;
 
+  // чекбокс
   var check = document.createElement('button');
   check.className = 'checkbox';
   check.textContent = task.done ? '✓' : '';
   li.appendChild(check);
 
-  var block = document.createElement('div');
-  li.appendChild(block);
+  // текст
+  var textDiv = document.createElement('div');
+  textDiv.className = 'task-title';
+  textDiv.textContent = task.title;
+  li.appendChild(textDiv);
 
-  var title = document.createElement('div');
-  title.className = 'task-title';
-  title.textContent = task.title;
-  block.appendChild(title);
+  // дата
+  var meta = document.createElement('div');
+  meta.className = 'task-meta';
+  meta.textContent = task.date
+    ? 'Крайний срок: ' + formatDate(task.date)
+    : 'Крайний срок: без даты';
+  li.appendChild(meta);
 
-  var date = document.createElement('div');
-  date.className = 'task-meta';
-  date.textContent = task.date ? task.date : "Без даты";
-  block.appendChild(date);
+  // кнопки
+  var actions = document.createElement('div');
+  actions.className = 'actions';
+  li.appendChild(actions);
 
   var btnEdit = document.createElement('button');
-  btnEdit.textContent = '✎';
-  li.appendChild(btnEdit);
+  btnEdit.textContent = 'Изменить';
+  actions.appendChild(btnEdit);
 
-  var btnDel = document.createElement('button');
-  btnDel.textContent = '✕';
-  li.appendChild(btnDel);
+  var btnDelete = document.createElement('button');
+  btnDelete.textContent = 'Удалить';
+  actions.appendChild(btnDelete);
 
-  check.onclick = () => toggleDone(task.id);
-  btnDel.onclick = () => removeTask(task.id);
-  btnEdit.onclick = () => editTask(task);
+  // события
+  check.addEventListener('click', function() {
+    toggleDone(task.id);
+  });
+
+  btnDelete.addEventListener('click', function() {
+    deleteTask(task.id);
+  });
+
+  btnEdit.addEventListener('click', function() {
+    openEditDialog(task);
+  });
+
+  // drag and drop
+  li.addEventListener('dragstart', function(e) {
+    e.dataTransfer.setData('text/plain', task.id);
+    li.classList.add('dragging');
+  });
+
+  li.addEventListener('dragend', function() {
+    li.classList.remove('dragging');
+  });
 
   return li;
 }
 
-/* Рендер */
-function render(){
+
+// === Рендер списка ===
+
+function renderTasks() {
   list.innerHTML = '';
 
-  var arr = tasks.slice();
+  var visibleTasks = tasks.slice();
 
-  if(searchQuery){
-    arr = arr.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()));
+  // Поиск
+  if (searchQuery.trim() !== '') {
+    var q = searchQuery.toLowerCase();
+    visibleTasks = visibleTasks.filter(function(t) {
+      return t.title.toLowerCase().includes(q);
+    });
   }
-  if(filterMode=='active') arr = arr.filter(t => !t.done);
-  if(filterMode=='done') arr = arr.filter(t => t.done);
 
-  arr.sort((a,b)=>a.date.localeCompare(b.date||(sortAsc?1:-1)));
-  if(!sortAsc) arr.reverse();
+  // Фильтр
+  if (filterMode === 'active') visibleTasks = visibleTasks.filter(t => !t.done);
+  if (filterMode === 'done') visibleTasks = visibleTasks.filter(t => t.done);
 
-  if(arr.length===0){
-    emptyNote.style.display='block';
+  // Сортировка
+  visibleTasks.sort(function(a, b) {
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+    return new Date(a.date) - new Date(b.date);
+  });
+
+  if (!sortAsc) visibleTasks.reverse();
+
+  // Отображение
+  if (visibleTasks.length === 0) {
+    emptyNote.style.display = 'block';
   } else {
-    emptyNote.style.display='none';
-    arr.forEach(t => list.appendChild(createTaskElement(t)));
+    emptyNote.style.display = 'none';
+    visibleTasks.forEach(t => list.appendChild(createTaskElement(t)));
   }
+
+  var doneCount = tasks.filter(t => t.done).length;
+  counter.textContent = 'Всего: ' + tasks.length + ' | Выполнено: ' + doneCount;
 }
 
-/* Логика */
-function addTask(title,date){
-  tasks.push({ id:generateId(), title, date, done:false });
-  saveTasks(); render();
-}
-function removeTask(id){
-  tasks = tasks.filter(t=>t.id!==id);
-  saveTasks(); render();
-}
-function toggleDone(id){
-  tasks.find(t=>t.id===id).done ^=1;
-  saveTasks(); render();
-}
-function editTask(task){
-  var newTitle = prompt("Новое имя",task.title);
-  if(newTitle!==null && newTitle.trim()){
-    task.title = newTitle.trim();
-  }
-  var newDate = prompt("Новая дата YYYY-MM-DD",task.date||"");
-  if(newDate!==null) task.date=newDate;
-  saveTasks(); render();
-}
 
-/* Слушатели */
-form.onsubmit = e=>{
-  e.preventDefault();
-  addTask(inputTitle.value,inputDate.value);
-  inputTitle.value='';
-  inputDate.value='';
-};
-inputSearch.oninput=()=>{ searchQuery=inputSearch.value; render(); };
-selectFilter.onchange=()=>{ filterMode=selectFilter.value; render(); };
-btnSort.onclick=()=>{
-  sortAsc=!sortAsc;
-  btnSort.textContent = sortAsc?"Сортировать ↑":"Сортировать ↓";
-  render();
-};
+// === CRUD ===
 
-/* Drag & Drop сохранение порядка */
-list.addEventListener('dragstart', e=>{
-  e.target.classList.add('dragging');
-});
-list.addEventListener('dragend', e=>{
-  e.target.classList.remove('dragging');
-  var newOrder=[];
-  list.querySelectorAll('.task-item').forEach(li=>{
-    var t=tasks.find(x=>x.id==li.dataset.id);
-    if(t) newOrder.push(t);
-  });
-  tasks = newOrder;
+function addTask(title, date) {
+  var newTask = {
+    id: generateId(),
+    title: title,
+    date: date,
+    done: false
+  };
+  tasks.push(newTask);
   saveTasks();
-});
-list.addEventListener('dragover', e=>{
-  e.preventDefault();
-  let dragging = list.querySelector('.dragging');
-  let after = [...list.children].find(li=>{
-    return e.clientY <= li.getBoundingClientRect().top + li.offsetHeight/2;
+  renderTasks();
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasks();
+  renderTasks();
+}
+
+function toggleDone(id) {
+  tasks.forEach(t => {
+    if (t.id === id) t.done = !t.done;
   });
-  list.insertBefore(dragging,after);
+  saveTasks();
+  renderTasks();
+}
+
+
+// === Модалка ===
+
+var modalOverlay = document.createElement('div');
+modalOverlay.className = 'modal-overlay';
+modalOverlay.style.display = 'none';
+document.body.appendChild(modalOverlay);
+
+var modalWindow = document.createElement('div');
+modalWindow.className = 'modal-window';
+modalOverlay.appendChild(modalWindow);
+
+var modalTitle = document.createElement('h3');
+modalWindow.appendChild(modalTitle);
+
+var modalContent = document.createElement('div');
+modalContent.className = 'modal-content';
+modalWindow.appendChild(modalContent);
+
+var modalButtons = document.createElement('div');
+modalButtons.className = 'modal-buttons';
+modalWindow.appendChild(modalButtons);
+
+function showModal(title, contentNode, buttons) {
+  modalTitle.textContent = title;
+  modalContent.innerHTML = '';
+  modalContent.appendChild(contentNode);
+  modalButtons.innerHTML = '';
+  buttons.forEach(btn => modalButtons.appendChild(btn));
+  modalOverlay.style.display = 'flex';
+}
+
+function closeModal() {
+  modalOverlay.style.display = 'none';
+}
+
+// Редактирование задачи
+function openEditDialog(task) {
+  var wrapper = document.createElement('div');
+
+  var lbl1 = document.createElement('label');
+  lbl1.textContent = 'Название:';
+
+  var input1 = document.createElement('input');
+  input1.type = 'text';
+  input1.value = task.title;
+  input1.style.display = 'block';
+  input1.style.marginBottom = '10px';
+
+  var lbl2 = document.createElement('label');
+  lbl2.textContent = 'Дата (YYYY-MM-DD):';
+
+  var input2 = document.createElement('input');
+  input2.type = 'date';
+  input2.value = task.date || '';
+
+  wrapper.appendChild(lbl1);
+  wrapper.appendChild(input1);
+  wrapper.appendChild(lbl2);
+  wrapper.appendChild(input2);
+
+  var btnOk = document.createElement('button');
+  btnOk.textContent = 'Сохранить';
+  btnOk.addEventListener('click', function() {
+    task.title = input1.value.trim() || task.title;
+    task.date = input2.value;
+    saveTasks();
+    renderTasks();
+    closeModal();
+  });
+
+  var btnCancel = document.createElement('button');
+  btnCancel.textContent = 'Отмена';
+  btnCancel.addEventListener('click', closeModal);
+
+  showModal('Изменение задачи', wrapper, [btnOk, btnCancel]);
+}
+
+
+// === drag & drop перестановка ===
+
+list.addEventListener('dragover', function(e) {
+  e.preventDefault();
+
+  const draggingEl = list.querySelector('.dragging');
+  const afterElement = getDragAfterElement(list, e.clientY);
+
+  if (afterElement == null) {
+    list.appendChild(draggingEl);
+  } else {
+    list.insertBefore(draggingEl, afterElement);
+  }
 });
 
-/* Запуск */
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.task-item:not(.dragging)')];
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+list.addEventListener('drop', function(e) {
+  e.preventDefault();
+  const newTasks = [];
+  list.querySelectorAll('.task-item').forEach(li => {
+    const task = tasks.find(t => t.id === li.dataset.taskId);
+    if (task) newTasks.push(task);
+  });
+  tasks = newTasks;
+  saveTasks();
+  renderTasks();
+});
+
+
+// === Слушатели ===
+
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  var title = inputTitle.value.trim();
+  var date = inputDate.value;
+  if (title === '') {
+    alert('Введите название задачи');
+    return;
+  }
+  addTask(title, date);
+  inputTitle.value = '';
+  inputDate.value = '';
+});
+
+inputSearch.addEventListener('input', function() {
+  searchQuery = inputSearch.value;
+  renderTasks();
+});
+
+selectFilter.addEventListener('change', function() {
+  filterMode = selectFilter.value;
+  renderTasks();
+});
+
+btnSort.addEventListener('click', function() {
+  sortAsc = !sortAsc;
+  btnSort.textContent = sortAsc ? 'Сортировать ↑' : 'Сортировать ↓';
+  renderTasks();
+});
+
+// Новая версия удаления выполненных через модалку
+btnClearDone.addEventListener('click', function() {
+  var wrapper = document.createElement('div');
+  wrapper.textContent = 'Удалить все выполненные задачи?';
+
+  var btnYes = document.createElement('button');
+  btnYes.textContent = 'Да';
+  btnYes.addEventListener('click', function() {
+    tasks = tasks.filter(t => !t.done);
+    saveTasks();
+    renderTasks();
+    closeModal();
+  });
+
+  var btnNo = document.createElement('button');
+  btnNo.textContent = 'Отмена';
+  btnNo.addEventListener('click', closeModal);
+
+  showModal('Подтверждение', wrapper, [btnYes, btnNo]);
+});
+
+
+// === Старт ===
 loadTasks();
-render();
+renderTasks();
