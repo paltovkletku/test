@@ -1,137 +1,235 @@
-/* База */
-body {
+/* Сброс и базовая стилизация */
+html, body {
   margin: 0;
   padding: 0;
-  background: #fafafa;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  display: flex;
-  justify-content: center;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: #c8eac2;
+  color: #1e2f1b;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* Контейнер */
 .container {
   width: 100%;
-  max-width: 460px;
-  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 /* Заголовок */
-h1 {
+.header h1 {
+  margin: 0;
   font-size: 26px;
-  margin: 0 0 15px;
+  font-weight: 600;
+  text-align: center;
 }
 
-/* Панель */
+/* Панель управления */
 .controls {
   display: flex;
-  gap: 6px;
-  margin-bottom: 10px;
+  gap: 8px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
-/* Поля */
-input, select, button {
-  font-size: 14px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+/* Поля ввода */
+input,
+select,
+button {
+  font-family: inherit;
+  font-size: 15px;
+}
+
+input[type="text"],
+input[type="search"],
+input[type="date"],
+select {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #b9d8aa;
+  background: #f8fff4;
+  outline: none;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+select:focus {
+  border-color: #8dc372;
+  box-shadow: 0 0 0 3px rgba(122,205,113,0.25);
+}
+
+input[type="date"] {
+  min-width: 0; /* фикс ширины */
 }
 
 /* Кнопки */
 button {
-  background:#eee;
-  cursor:pointer;
+  padding: 10px 14px;
+  border: 1px solid #bfe5a6;
+  border-radius: 10px;
+  background: #dff7d2;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
 }
-button:hover { background:#ddd }
+
+button:hover {
+  background: #e9fbe1;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+button.small {
+  padding: 6px 8px;
+  font-size: 13px;
+}
 
 /* Форма */
 .form-row {
-  display:flex;
-  gap:6px;
-  margin:10px 0;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 /* Список задач */
 .list {
   list-style: none;
-  padding:0;
-  margin:0;
+  margin: 0;
+  padding: 0;
 }
 
-/* Элемент задачи – iOS стиль */
+/* Элемент задачи */
 .task-item {
   display: flex;
-  justify-content: space-between;
-  padding: 14px 12px;
-  border-bottom: 1px solid #e3e3e3;
-  background:#fff;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 10px;
+  border-bottom: 1px solid #d6e7c9;
+  background: #ffffff;
+  transition: background 0.2s ease;
 }
 
 .task-item:hover {
-  background:#f6f6f6;
+  background: #f6ffe9;
+}
+
+/* Выполненная задача */
+.task-item.done .task-title {
+  text-decoration: line-through;
+  color: #728b64;
 }
 
 /* Чекбокс */
 .checkbox {
-  width:26px;
-  height:26px;
-  border-radius:50%;
-  border:1px solid #aaa;
-  background:#fff;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #f1ffe6;
+  border: 1px solid #bfe5a6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
-/* Выполнено */
-.task-item.done .task-title {
-  text-decoration:line-through;
-  color: #999;
-}
-.task-item.done .checkbox {
-  background:#4CAF50;
-  color:#fff;
-  font-weight:bold;
+/* Текст */
+.task-title {
+  flex: 1;
+  font-size: 15px;
+  word-break: break-word;
 }
 
-/* дата */
+/* Дата */
 .task-meta {
   font-size: 12px;
-  color:#666;
+  color: #5c704c;
+  white-space: nowrap;
 }
 
-/* скрытое */
+/* Кнопки действий */
+.actions {
+  display: flex;
+  gap: 4px;
+}
+
+/* Пустой список */
 .empty-note {
-  color:#777;
-  margin:15px 0;
+  text-align: center;
+  color: #5c704c;
+  padding: 10px;
+  font-size: 15px;
 }
 
-/* модалка */
+/* Подвал */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 6px;
+  border-top: 1px solid #d6e7c9;
+  font-size: 14px;
+}
+
+/* === Модальное окно === */
 .modal-overlay {
   position: fixed;
-  inset:0;
-  background:rgba(0,0,0,.4);
-  display:none;
-  justify-content:center;
-  align-items:center;
+  inset: 0;
+  background: rgba(40, 60, 35, 0.25);
+  display: none;
+  justify-content: center;
+  align-items: center;
 }
+
 .modal-window {
+  padding: 18px;
   width: 90%;
-  max-width:320px;
-  background:#fff;
-  padding:15px;
-  border-radius:12px;
+  max-width: 350px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 22px rgba(20, 40, 20, 0.25);
 }
+
+.modal-window h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.modal-content {
+  margin: 12px 0;
+}
+
 .modal-buttons {
-  margin-top:12px;
-  text-align:right;
-  display:flex;
-  gap:8px;
-  justify-content:flex-end;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 /* Адаптив */
-@media (max-width:500px){
-  .form-row {
-    flex-direction:column;
+@media (max-width: 600px) {
+  input[type="date"] {
+    width: 100%;
+    max-width: 100%;
   }
-  input,button,select {
-    width:100%;
+  .form-row,
+  .controls {
+    width: 100%;
+  }
+  button,
+  select,
+  input {
+    width: 100%;
+  }
+  .task-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .actions {
+    align-self: flex-end;
   }
 }
