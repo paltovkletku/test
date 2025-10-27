@@ -34,11 +34,18 @@ inputSearch.placeholder = "Поиск";
 controls.appendChild(inputSearch);
 
 var selectFilter = document.createElement('select');
-selectFilter.innerHTML = `
-<option value="all">Все</option>
-<option value="active">Активные</option>
-<option value="done">Выполненные</option>`;
 controls.appendChild(selectFilter);
+
+[
+  {value:'all', text:'Все'},
+  {value:'active', text:'Активные'},
+  {value:'done', text:'Выполненные'}
+].forEach(optData=>{
+  var opt=document.createElement('option');
+  opt.value=optData.value;
+  opt.textContent=optData.text;
+  selectFilter.appendChild(opt);
+});
 
 var btnSort = document.createElement('button');
 btnSort.textContent = "Сортировать ↑";
@@ -117,7 +124,8 @@ function createTaskElement(task){
 
 /* Рендер */
 function render(){
-  list.innerHTML = '';
+  while (list.firstChild)
+    list.removeChild(list.firstChild);
 
   var arr = tasks.slice();
 
@@ -127,15 +135,16 @@ function render(){
   if(filterMode=='active') arr = arr.filter(t => !t.done);
   if(filterMode=='done') arr = arr.filter(t => t.done);
 
-  arr.sort((a,b)=>a.date.localeCompare(b.date||(sortAsc?1:-1)));
+  arr.sort((a,b)=>{
+    if(!a.date) return 1;
+    if(!b.date) return -1;
+    return a.date.localeCompare(b.date);
+  });
   if(!sortAsc) arr.reverse();
 
-  if(arr.length===0){
-    emptyNote.style.display='block';
-  } else {
-    emptyNote.style.display='none';
-    arr.forEach(t => list.appendChild(createTaskElement(t)));
-  }
+  emptyNote.style.display = arr.length === 0 ? 'block' : 'none';
+
+  arr.forEach(t => list.appendChild(createTaskElement(t)));
 }
 
 /* Логика */
@@ -148,8 +157,11 @@ function removeTask(id){
   saveTasks(); render();
 }
 function toggleDone(id){
-  tasks.find(t=>t.id===id).done ^=1;
-  saveTasks(); render();
+  var t = tasks.find(t=>t.id===id);
+  if(t){
+    t.done = !t.done;
+    saveTasks(); render();
+  }
 }
 function editTask(task){
   var newTitle = prompt("Новое имя",task.title);
@@ -176,7 +188,7 @@ btnSort.onclick=()=>{
   render();
 };
 
-/* Drag & Drop сохранение порядка */
+/* Drag & Drop порядок */
 list.addEventListener('dragstart', e=>{
   e.target.classList.add('dragging');
 });
