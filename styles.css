@@ -233,3 +233,23 @@ button.small {
     align-self: flex-end;
   }
 }
+
+/* === Дополнительно для модального окна === */
+.modal-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #b9d8aa;
+  margin-top: 6px;
+  font-size: 15px;
+}
+
+.modal-input:focus {
+  border-color: #8dc372;
+  box-shadow: 0 0 0 3px rgba(122,205,113,0.25);
+}
+
+.modal-buttons button {
+  min-width: 80px;
+}
+
