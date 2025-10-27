@@ -173,6 +173,80 @@ function editTask(task){
   saveTasks(); render();
 }
 
+/* === Модальное окно редактирования === */
+var modalOverlay = document.createElement('div');
+modalOverlay.className = 'modal-overlay';
+
+var modal = document.createElement('div');
+modal.className = 'modal-window';
+
+var modalTitle = document.createElement('h3');
+modalTitle.textContent = "Редактирование";
+modal.appendChild(modalTitle);
+
+var modalContent = document.createElement('div');
+modalContent.className = 'modal-content';
+modal.appendChild(modalContent);
+
+var modalInputTitle = document.createElement('input');
+modalInputTitle.className = 'modal-input';
+modalInputTitle.placeholder = "Название";
+modalContent.appendChild(modalInputTitle);
+
+var modalInputDate = document.createElement('input');
+modalInputDate.className = 'modal-input';
+modalInputDate.type = 'date';
+modalContent.appendChild(modalInputDate);
+
+var modalButtons = document.createElement('div');
+modalButtons.className = 'modal-buttons';
+modal.appendChild(modalButtons);
+
+var btnSaveModal = document.createElement('button');
+btnSaveModal.textContent = "Сохранить";
+modalButtons.appendChild(btnSaveModal);
+
+var btnCancelModal = document.createElement('button');
+btnCancelModal.textContent = "Отмена";
+modalButtons.appendChild(btnCancelModal);
+
+modalOverlay.appendChild(modal);
+document.body.appendChild(modalOverlay);
+
+var currentEditTask = null;
+
+function openEditModal(task){
+  currentEditTask = task;
+  modalInputTitle.value = task.title;
+  modalInputDate.value = task.date || "";
+  modalOverlay.style.display = "flex";
+}
+
+function closeEditModal(){
+  modalOverlay.style.display = "none";
+  currentEditTask = null;
+}
+
+btnCancelModal.onclick = closeEditModal;
+
+btnSaveModal.onclick = function(){
+  if(currentEditTask){
+    var newTitle = modalInputTitle.value.trim();
+    if(newTitle){
+      currentEditTask.title = newTitle;
+    }
+    currentEditTask.date = modalInputDate.value || null;
+    saveTasks();
+    render();
+  }
+  closeEditModal();
+};
+
+/* Изменяем функцию редактирования */
+function editTask(task){
+  openEditModal(task);
+}
+
 /* Слушатели */
 form.onsubmit = e=>{
   e.preventDefault();
