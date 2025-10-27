@@ -1,324 +1,137 @@
-/* Базовые сбросы */
-html, body {
+/* База */
+body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", "Segoe UI", sans-serif;
-  background: #c8eac2; /* мягкий зеленоватый фон */
-  color: #1e2f1b; /* глубокий зелёный текст */
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Контейнер */
-.container {
-  padding: 20px;
+  background: #fafafa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
 }
 
-/* Карточка приложения */
-.card {
+.container {
   width: 100%;
-  max-width: 920px;
-  background: #ffffff;
-  border: 1px solid #dcefd6;
-  border-radius: 12px;
+  max-width: 460px;
   padding: 20px;
-  box-shadow: 0 6px 16px rgba(26, 48, 22, 0.07);
 }
 
-/* header */
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 12px;
+/* Заголовок */
+h1 {
+  font-size: 26px;
+  margin: 0 0 15px;
 }
 
-.title {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 600;
-  color: #183015;
-}
-
-/* панель управления в header */
+/* Панель */
 .controls {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
-  align-items: center;
 }
 
-/* inputs и select */
-input[type="text"],
-input[type="search"],
-input[type="date"],
-select {
+/* Поля */
+input, select, button {
+  font-size: 14px;
   padding: 8px 10px;
-  border: 1px solid #cfe6b8;
   border-radius: 8px;
-  background: #f9fff7;
-  font-family: inherit;
-  font-size: 14px;
-  color: #1e2f1b;
-  outline: none;
-  min-width: 140px;
-  transition: border 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #ddd;
 }
 
-input:focus,
-select:focus {
-  border-color: #a9d48d;
-  box-shadow: 0 0 0 3px rgba(160, 220, 140, 0.25);
-}
-
-/* кнопки */
+/* Кнопки */
 button {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #bfe5a6;
-  background: #dff7d2; /* светло-зелёный */
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 14px;
-  color: #1e2f1b;
-  transition: background 0.2s ease, transform 0.1s ease;
+  background:#eee;
+  cursor:pointer;
 }
+button:hover { background:#ddd }
 
-button:hover {
-  background: #e9fbe1;
-}
-
-button:active {
-  transform: scale(0.98);
-}
-
-button.ghost {
-  background: transparent;
-  border: 1px dashed #bfe5a6;
-}
-
-button.small {
-  padding: 6px 8px;
-  font-size: 13px;
-}
-
-/* форма добавления */
+/* Форма */
 .form-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin: 10px 0 14px 0;
-  flex-wrap: wrap;
+  display:flex;
+  gap:6px;
+  margin:10px 0;
 }
 
-/* список задач */
+/* Список задач */
 .list {
   list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  padding:0;
+  margin:0;
 }
 
-/* одиночная задача */
+/* Элемент задачи – iOS стиль */
 .task-item {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #e0f2d5;
-  background: #ffffff;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.2s;
+  justify-content: space-between;
+  padding: 14px 12px;
+  border-bottom: 1px solid #e3e3e3;
+  background:#fff;
 }
 
 .task-item:hover {
-  background: #f8fff4;
+  background:#f6f6f6;
 }
 
-/* визуал при перетаскивании */
-.task-item.dragging {
-  opacity: 0.7;
-  transform: scale(0.995);
-  box-shadow: 0 8px 18px rgba(37,50,29,0.08);
-}
-
-/* checkbox */
+/* Чекбокс */
 .checkbox {
-  width: 34px;
-  height: 34px;
-  border-radius: 6px;
-  border: 1px solid #cde7b3;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  background: #f4fff0;
-  color: #1f3215;
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  border:1px solid #aaa;
+  background:#fff;
 }
 
-/* если выполнена — мягкий фон и перечёркнутый текст */
-.task-item.done {
-  background: linear-gradient(180deg, #ebffe2 0%, #e2ffd7 100%);
-  opacity: 0.95;
-}
+/* Выполнено */
 .task-item.done .task-title {
-  text-decoration: line-through;
-  color: #708c61;
+  text-decoration:line-through;
+  color: #999;
+}
+.task-item.done .checkbox {
+  background:#4CAF50;
+  color:#fff;
+  font-weight:bold;
 }
 
-/* основной блок текста задачи */
-.task-title {
-  font-size: 14px;
-  flex: 1 1 auto;
-  word-break: break-word;
-}
-
-/* мета (дата) */
+/* дата */
 .task-meta {
   font-size: 12px;
-  color: #5c704c;
-  white-space: nowrap;
-  margin-left: 6px;
+  color:#666;
 }
 
-/* действия */
-.actions {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-/* пустая заметка */
+/* скрытое */
 .empty-note {
-  margin: 12px 0;
-  color: #6b7c58;
-  font-size: 14px;
+  color:#777;
+  margin:15px 0;
 }
 
-/* футер */
-.footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.footer .controls {
-  margin-left: auto;
-}
-
-/* === Простая модалка === */
+/* модалка */
 .modal-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(40, 60, 35, 0.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 99;
-  transition: opacity 0.2s ease;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  display:none;
+  justify-content:center;
+  align-items:center;
 }
-
 .modal-window {
-  background: #fafff6;
-  border: 1px solid #cfe6b8;
-  border-radius: 12px;
-  padding: 18px;
   width: 90%;
-  max-width: 360px;
-  box-shadow: 0 8px 22px rgba(20, 40, 20, 0.2);
-  animation: pop 0.15s ease;
+  max-width:320px;
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
 }
-
-@keyframes pop {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-.modal-window h3 {
-  margin-top: 0;
-  color: #1e2f1b;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.modal-content {
-  margin-top: 10px;
-  margin-bottom: 14px;
-}
-
-.modal-content input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 6px 8px;
-  margin-top: 4px;
-  border: 1px solid #cfe6b8;
-  border-radius: 6px;
-  background: #f8fff2;
-  font-family: inherit;
-  font-size: 14px;
-}
-
 .modal-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
+  margin-top:12px;
+  text-align:right;
+  display:flex;
+  gap:8px;
+  justify-content:flex-end;
 }
 
-.modal-buttons button {
-  padding: 6px 10px;
-  border: 1px solid #bfe5a6;
-  background: #e4fbd8;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.2s ease;
-}
-
-.modal-buttons button:hover {
-  background: #f0ffe6;
-}
-
-
-@media (max-width: 640px) {
-  .card {
-    padding: 12px;
-    overflow: hidden; /* из второго блока */
-  }
-  .controls {
-    gap: 6px;
-  }
+/* Адаптив */
+@media (max-width:500px){
   .form-row {
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-    box-sizing: border-box;
+    flex-direction:column;
   }
-  input[type="text"],
-  input[type="date"],
-  select,
-  button {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-  .task-meta {
-    display: block;
-    margin-left: 0;
-    margin-top: 6px;
-    font-size: 12px;
-  }
-  .task-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+  input,button,select {
+    width:100%;
   }
 }
-
