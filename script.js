@@ -383,8 +383,8 @@ function startNewGame() {
   grid = createEmptyGrid();
   score = 0;
   gameOver = false;
-  // в начале 1-3 случайных тайла
-  const initial = Math.floor(Math.random()*3) + 1; // 1..3
+  // ГАРАНТИРУЕМ минимум 2 плитки в начале игры
+  const initial = Math.floor(Math.random() * 2) + 2; // всегда 2 или 3 плитки
   spawnNewTiles(grid, initial);
   saveUndoState(); // сохраняем начальное для отмены
   saveGameState();
