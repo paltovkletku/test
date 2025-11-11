@@ -3,66 +3,75 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="styles.css">
   <title>2048 — Лабораторная</title>
-  
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="container">
-
   <header class="header">
-    <h1>2048 — Pink Edition</h1>
-
-    <div class="scoreboard">
+    <h1>2048</h1>
+    <div class="controls-top">
       <div class="score-box">
-        <div>Score</div>
+        <div>Счёт</div>
         <div id="score">0</div>
       </div>
-      <div class="score-box">
-        <div>Best</div>
-        <div id="best">0</div>
+      <div class="buttons">
+        <button id="newGameBtn" class="btn">Начать заново</button>
+        <button id="undoBtn" class="btn">Отмена хода</button>
+        <button id="leaderBtn" class="btn">Таблица лидеров</button>
       </div>
     </div>
   </header>
 
-  <div class="board" id="board">
-    <div class="grid" id="grid"></div>
+  <main>
+    <section class="game-area">
+      <div id="gameContainer" class="game-container" aria-label="Игровое поле" tabindex="0">
+        <!-- Сюда JS динамически создаёт grid и плитки -->
+        <div class="grid"></div>
+        <div class="tiles-layer"></div>
+      </div>
 
-    <div id="overlay" class="overlay">
-      <h3 id="gameOverTitle">Игра окончена</h3>
-      <p id="gameOverText">Введите имя и сохраните результат</p>
+      <aside class="info">
+        <p>Управление: стрелки (ПК) — свайпы (моб. устройства)</p>
+        <p>При завершении игры можно сохранить рекорд с именем.</p>
+      </aside>
+    </section>
+  </main>
 
-      <input id="player" type="text" placeholder="Ваше имя"/>
-
-      <button id="save">Сохранить</button>
-      <button id="restart">Начать заново</button>
+  <!-- Модалка Game Over / Save -->
+  <div id="gameOverModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <h2 id="modalMessage">Игра окончена</h2>
+      <div id="saveRow" class="save-row">
+        <input id="playerName" type="text" placeholder="Ваше имя" maxlength="30" />
+        <button id="saveScoreBtn" class="btn">Сохранить результат</button>
+      </div>
+      <div class="modal-actions">
+        <button id="modalRestartBtn" class="btn">Начать заново</button>
+        <button id="modalCloseBtn" class="btn btn-secondary">Закрыть</button>
+      </div>
     </div>
   </div>
 
-  <div class="controls">
-    <button id="undo">Отмена</button>
-    <button id="restartBtn">↻</button>
-    <button id="openLB">Лидерборд</button>
-  </div>
-
-  <div class="mobile-controls" id="mobileControls">
-    <button id="upBtn">▲</button>
-    <div style="display:flex; gap:8px">
-      <button id="leftBtn">◀</button>
-      <button id="downBtn">▼</button>
-      <button id="rightBtn">▶</button>
+  <!-- Лидерборд -->
+  <div id="leaderboardModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-content leaderboard-content">
+      <h2>Таблица лидеров — Топ 10</h2>
+      <div class="leaders-container">
+        <table id="leadersTable" class="leaders-table" aria-label="Таблица лидеров">
+          <thead>
+            <tr><th>№</th><th>Имя</th><th>Очки</th><th>Дата</th></tr>
+          </thead>
+          <tbody>
+            <!-- Содержимое генерируется JS -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-actions">
+        <button id="closeLeadersBtn" class="btn">Закрыть</button>
+        <button id="clearLeadersBtn" class="btn btn-secondary">Очистить</button>
+      </div>
     </div>
   </div>
-
-</div>
-
-<!-- модалка лидерборда -->
-<div id="leaderboard" class="modal hidden">
-  <h3>Топ-10 рекордов</h3>
-  <div id="lbList"></div>
-  <button id="closeLB">Закрыть</button>
-</div>
-
-<script defer src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
