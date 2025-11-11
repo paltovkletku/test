@@ -1,4 +1,3 @@
-/* Общие стили */
 :root{
   --bg: #fff6fb;
   --panel: #ffffffcc;
@@ -15,6 +14,7 @@ html,body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color:var(--text); 
   background: linear-gradient(180deg,#fff6fb, #fff0f8); 
+  touch-action: manipulation;
 }
 
 /* Header */
@@ -280,7 +280,7 @@ main {
   text-align: center;
 }
 
-/* Мобильные кнопки управления */
+/* Мобильные кнопки управления - ИСПРАВЛЕННЫЕ СТИЛИ */
 .mobile-controls {
   position: fixed;
   bottom: 20px;
@@ -296,7 +296,11 @@ main {
 }
 
 .mobile-controls.visible {
-  display: block;
+  display: block !important;
+}
+
+.mobile-controls.hidden {
+  display: none !important;
 }
 
 .controls-row {
@@ -326,6 +330,7 @@ main {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  touch-action: manipulation;
 }
 
 .control-btn:active {
@@ -351,18 +356,23 @@ main {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .mobile-controls {
+    display: block !important;
+  }
+  
   .header h1 { font-size: 24px; }
   .score-box > div:last-child { font-size: 18px; }
   
   .control-btn {
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
+    width: 55px;
+    height: 55px;
+    font-size: 22px;
   }
   
   .mobile-controls {
-    padding: 12px;
+    padding: 14px;
+    bottom: 15px;
   }
   
   .controls-row {
@@ -377,5 +387,41 @@ main {
     padding: 8px 14px;
     min-width: 90px;
     font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header h1 { font-size: 22px; }
+  
+  .control-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
+  .mobile-controls {
+    padding: 12px;
+    bottom: 10px;
+  }
+  
+  .controls-row {
+    gap: 10px;
+  }
+  
+  .buttons {
+    gap: 8px;
+  }
+  
+  .btn {
+    padding: 8px 12px;
+    min-width: 80px;
+    font-size: 13px;
+  }
+}
+
+/* На больших экранах скрываем мобильные кнопки */
+@media (min-width: 1025px) {
+  .mobile-controls {
+    display: none !important;
   }
 }
