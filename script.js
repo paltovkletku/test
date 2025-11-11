@@ -40,7 +40,7 @@ let gameOver = false;
 let undoState = null;
 let tileIdCounter = 1;
 
-/* ======= ИНИЦИАЛИЗАЦИЯ ИГРЫ ======= */
+/* ====== ИНИЦИАЛИЗАЦИЯ ИГРЫ ======= */
 
 function createGridUI() {
   while (gridEl.firstChild) gridEl.removeChild(gridEl.firstChild);
