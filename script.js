@@ -1,5 +1,5 @@
 /* script.js — все динамически создаётся через чистый JS (без innerHTML/outerHTML) */
-/* решила что начинать игру будет с 2-3 тайлов, не с одного
+/* решила что начинать игру будет с 2-3 тайлов, не с одного */
 /* ======= Конфигурации ======= */
 const SIZE = 4;
 const STORAGE_KEY = 'game2048_state_v1';
@@ -259,7 +259,6 @@ function spawnNewTiles(board, count=1) {
   return board;
 }
 
-
 /* ====== Рендеринг плиток (DOM) ====== */
 function renderGrid(oldGrid = null) {
   // Обновляем счет
@@ -296,10 +295,20 @@ function renderGrid(oldGrid = null) {
       const uid = tileIdCounter++;
       tile.dataset.key = `${r}-${c}-${val}-${uid}`;
 
-      // Анимация появления новых плиток
-      if (oldGrid && oldGrid[r][c] === 0) {
-        tile.classList.add('new');
-      } else if (!oldGrid) {
+      // Определяем тип анимации на основе изменений
+      if (oldGrid) {
+        const wasEmpty = (oldGrid[r][c] === 0);
+        const valueChanged = (oldGrid[r][c] !== val);
+        const wasMerged = (oldGrid[r][c] !== 0 && val === oldGrid[r][c] * 2);
+        
+        if (wasEmpty) {
+          // Новая плитка - анимация появления
+          tile.classList.add('new');
+        } else if (wasMerged) {
+          // Плитка получилась в результате слияния
+          tile.classList.add('merge');
+        }
+      } else {
         // Первоначальное появление
         tile.classList.add('new');
       }
@@ -308,7 +317,6 @@ function renderGrid(oldGrid = null) {
     }
   }
 }
-
 
 /* ====== Управление видимостью мобильных кнопок ====== */
 function isMobileDevice() {
@@ -327,8 +335,6 @@ function updateMobileControlsVisibility() {
 }
 
 function startNewGame() {
-  const oldGrid = cloneGrid(grid); // Сохраняем для возможной анимации
-  
   grid = createEmptyGrid();
   score = 0;
   gameOver = false;
@@ -338,8 +344,7 @@ function startNewGame() {
   saveUndoState(); // сохраняем начальное для отмены
   saveGameState();
   
-  // Передаем старое состояние для анимации
-  renderGrid(oldGrid);
+  renderGrid();
   hideGameOverModal();
   updateMobileControlsVisibility();
 }
@@ -364,16 +369,6 @@ function performMove(direction) {
     return false;
   }
   
-  // Находим позиции слияний для анимации
-  const mergedPositions = [];
-  for (let r = 0; r < SIZE; r++) {
-    for (let c = 0; c < SIZE; c++) {
-      if (grid[r][c] > oldGrid[r][c] && oldGrid[r][c] !== 0) {
-        mergedPositions.push({ r, c });
-      }
-    }
-  }
-  
   // применяем новую сетку
   grid = result.grid;
   score += result.gained;
@@ -393,19 +388,6 @@ function performMove(direction) {
   // Передаем старое состояние для анимации
   renderGrid(oldGrid);
   
-  // Запускаем анимацию слияния после отрисовки
-  if (mergedPositions.length > 0) {
-    setTimeout(() => {
-      mergedPositions.forEach(pos => {
-        const tile = tilesLayer.querySelector(`[data-row="${pos.r}"][data-col="${pos.c}"]`);
-        if (tile) {
-          tile.classList.add('merge');
-          setTimeout(() => tile.classList.remove('merge'), 400);
-        }
-      });
-    }, 50);
-  }
-  
   return true;
 }
 
@@ -418,16 +400,12 @@ function undoMove() {
     return;
   }
   
-  // Сохраняем текущее состояние для возможной анимации
-  const oldGrid = cloneGrid(grid);
-  
   grid = raw.grid;
   score = raw.score;
   gameOver = raw.gameOver;
   saveGameState();
   
-  // Передаем старое состояние для анимации
-  renderGrid(oldGrid);
+  renderGrid();
 }
 
 /* Модалки */
@@ -499,7 +477,6 @@ modalRestartBtn.addEventListener('click', ()=>{
 });
 modalCloseBtn.addEventListener('click', hideGameOverModal);
 
-/* Leaderboard buttons */
 /* Leaderboard buttons */
 leaderBtn.addEventListener('click', ()=>{
   showLeaderboard();
