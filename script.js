@@ -1,5 +1,3 @@
-/* script.js — все динамически создаётся через чистый JS (без innerHTML/outerHTML) */
-/* решила что начинать игру будет с 2-3 тайлов, не с одного */
 /* ======= Конфигурации ======= */
 const SIZE = 4;
 const STORAGE_KEY = 'game2048_state_v1';
@@ -39,16 +37,12 @@ const clearLeadersBtn = document.getElementById('clearLeadersBtn');
 let grid = createEmptyGrid();
 let score = 0;
 let gameOver = false;
-
-/* Для undo: сохраняем прошлое состояние (грид, score) */
 let undoState = null;
-
-/* Уникальные id для DOM-плиток */
 let tileIdCounter = 1;
 
-/* Инициализация интерфейса: создаём визуальные ячейки (фон) динамически */
+/* ======= ИНИЦИАЛИЗАЦИЯ ИГРЫ ======= */
+
 function createGridUI() {
-  // Очистка
   while (gridEl.firstChild) gridEl.removeChild(gridEl.firstChild);
 
   for (let r=0;r<SIZE;r++){
@@ -64,7 +58,8 @@ function createGridUI() {
 
 createGridUI();
 
-/* --- ВСПОМОГАТЕЛИ --- */
+/* ======= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ======= */
+
 function createEmptyGrid() {
   const g = [];
   for (let i=0;i<SIZE;i++){
@@ -77,13 +72,14 @@ function cloneGrid(g) {
   return g.map(row => row.slice());
 }
 
-/* Сохранение/загрузка game state */
+/* Сохранение/загрузка состояния */
 function saveGameState() {
   const state = { grid, score, gameOver };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch (e) { console.warn('LocalStorage save failed', e); }
 }
+
 function loadGameState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -96,12 +92,14 @@ function loadGameState() {
     return true;
   } catch (e) { return false; }
 }
+
 function saveUndoState() {
   undoState = { grid: cloneGrid(grid), score, gameOver };
   try {
     localStorage.setItem(UNDO_KEY, JSON.stringify(undoState));
   } catch (e) {}
 }
+
 function loadUndoState() {
   try {
     const raw = localStorage.getItem(UNDO_KEY);
@@ -110,7 +108,7 @@ function loadUndoState() {
   } catch (e) { return null; }
 }
 
-/* ====== Лидерборд ====== */
+/* Лидерборд */
 function loadLeaders() {
   try {
     const raw = localStorage.getItem(LEADERS_KEY);
@@ -118,11 +116,13 @@ function loadLeaders() {
     return JSON.parse(raw);
   } catch (e) { return []; }
 }
+
 function saveLeaders(list) {
   try {
     localStorage.setItem(LEADERS_KEY, JSON.stringify(list));
   } catch (e) {}
 }
+
 function addLeader(name, scoreValue) {
   const list = loadLeaders();
   list.push({ name: name || '---', score: scoreValue, date: new Date().toISOString() });
@@ -131,11 +131,9 @@ function addLeader(name, scoreValue) {
   saveLeaders(top);
 }
 
-/* ====== Игровая логика (движение/слияние) ====== */
+/* ======= ИГРОВАЯ ЛОГИКА ======= */
 
-/* utility: rotate grid to reuse left-move logic */
 function rotateGrid(g) {
-  // rotate clockwise
   const ng = createEmptyGrid();
   for (let r=0;r<SIZE;r++){
     for (let c=0;c<SIZE;c++){
@@ -145,15 +143,14 @@ function rotateGrid(g) {
   return ng;
 }
 
-/* slide & merge single row to the left. Возвращает {newRow, gainedScore, moved, mergedPositions} */
 function processRowLeft(row) {
-  // убираем нули
   const original = row.slice();
   const nonZero = row.filter(v=>v!==0);
   const newRow = [];
   let gained = 0;
   let moved = false;
   let skip = false;
+  
   for (let i=0;i<nonZero.length;i++){
     if (skip) { skip = false; continue; }
     if (i+1 < nonZero.length && nonZero[i] === nonZero[i+1]) {
@@ -166,75 +163,75 @@ function processRowLeft(row) {
       newRow.push(nonZero[i]);
     }
   }
+  
   while (newRow.length < SIZE) newRow.push(0);
-  // moved if any difference
+  
   for (let i=0;i<SIZE;i++){
     if (newRow[i] !== original[i]) { moved = true; break; }
   }
+  
   return { newRow, gained, moved };
 }
 
-/* Возвращает {grid: newGrid, moved: bool, gained: points} */
 function moveLeft(board) {
   let movedOverall = false;
   let totalGain = 0;
   const newGrid = createEmptyGrid();
+  
   for (let r=0;r<SIZE;r++){
     const { newRow, gained, moved } = processRowLeft(board[r]);
     totalGain += gained;
     if (moved) movedOverall = true;
     newGrid[r] = newRow;
   }
+  
   return { grid: newGrid, moved: movedOverall, gained: totalGain };
 }
+
 function moveRight(board) {
-  // reverse rows, moveLeft, reverse back
   const rev = board.map(row => row.slice().reverse());
   const res = moveLeft(rev);
   const back = res.grid.map(row => row.slice().reverse());
   return { grid: back, moved: res.moved, gained: res.gained };
 }
+
 function moveUp(board) {
-  // rotate anticlockwise, moveLeft, rotate clockwise
   let rot = cloneGrid(board);
-  rot = rotateGrid(rotateGrid(rotateGrid(board))); // 3 clockwise == anticlockwise
+  rot = rotateGrid(rotateGrid(rotateGrid(board)));
   const res = moveLeft(rot);
-  // rotate back (1 clockwise)
   const back = rotateGrid(res.grid);
   return { grid: back, moved: res.moved, gained: res.gained };
 }
+
 function moveDown(board) {
-  // rotate clockwise once, moveLeft, rotate anticlockwise once
-  const rot = rotateGrid(board); // clockwise
+  const rot = rotateGrid(board);
   const res = moveLeft(rot);
-  // rotate back 3 times (anticlockwise)
   const back = rotateGrid(rotateGrid(rotateGrid(res.grid)));
   return { grid: back, moved: res.moved, gained: res.gained };
 }
 
-/* Проверка доступных ходов */
 function hasMoves(g) {
-  // empty cell?
   for (let r=0;r<SIZE;r++){
     for (let c=0;c<SIZE;c++){
       if (g[r][c] === 0) return true;
     }
   }
-  // adjacent equal?
+  
   for (let r=0;r<SIZE;r++){
     for (let c=0;c<SIZE-1;c++){
       if (g[r][c] === g[r][c+1]) return true;
     }
   }
+  
   for (let c=0;c<SIZE;c++){
     for (let r=0;r<SIZE-1;r++){
       if (g[r][c] === g[r+1][c]) return true;
     }
   }
+  
   return false;
 }
 
-/* Генерация 1-2 новых плиток в случайные пустые клетки (значения 2 или 4) */
 function spawnNewTiles(board, count=1) {
   const empties = [];
   for (let r=0;r<SIZE;r++){
@@ -242,74 +239,86 @@ function spawnNewTiles(board, count=1) {
       if (board[r][c] === 0) empties.push({r,c});
     }
   }
+  
   if (empties.length === 0) return board;
-  // если запрошено более доступного, сократить
+  
   const toSpawn = Math.min(count, empties.length);
-  // выбираем случайные уникальные индексы
   const chosen = [];
+  
   while (chosen.length < toSpawn){
     const idx = Math.floor(Math.random()*empties.length);
     if (!chosen.includes(idx)) chosen.push(idx);
   }
+  
   chosen.forEach(idx => {
     const pos = empties[idx];
     const v = Math.random() < 0.9 ? 2 : 4;
     board[pos.r][pos.c] = v;
   });
+  
   return board;
 }
 
-/* ====== Рендеринг плиток (DOM) ====== */
-function renderGrid(oldGrid = null) {
-  // Обновляем счет
-  scoreEl.textContent = String(score);
+/* ======= РЕНДЕРИНГ И АНИМАЦИИ ======= */
 
-  // Очистим слой
-  while (tilesLayer.firstChild) tilesLayer.removeChild(tilesLayer.firstChild);
-
-  // вычислим размеры клетки в пикселях
+function calculateTileSize() {
   const gridRect = gridEl.getBoundingClientRect();
   const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tile-gap')) || 12;
   const cellSize = (gridRect.width - gap * (SIZE + 1)) / SIZE;
+  return { cellSize, gap };
+}
 
-  // создаём плитки по текущему grid
+function calculateFontSize(value, cellSize) {
+  let baseSize = cellSize * 0.4;
+  
+  if (value >= 1024) baseSize = cellSize * 0.3;
+  else if (value >= 128) baseSize = cellSize * 0.35;
+  
+  return Math.max(12, Math.min(32, baseSize));
+}
+
+function renderGrid(oldGrid = null) {
+  scoreEl.textContent = String(score);
+
+  while (tilesLayer.firstChild) {
+    tilesLayer.removeChild(tilesLayer.firstChild);
+  }
+
+  const { cellSize, gap } = calculateTileSize();
+
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
       const val = grid[r][c];
       if (val === 0) continue;
       
       const tile = document.createElement('div');
-      tile.classList.add('tile');
-      tile.classList.add('v' + val);
+      tile.classList.add('tile', 'v' + val);
       tile.textContent = String(val);
       
-      // позиционируем абсолютно
       tile.style.width = `${cellSize}px`;
       tile.style.height = `${cellSize}px`;
       tile.style.left = `${gap + c * (cellSize + gap)}px`;
       tile.style.top = `${gap + r * (cellSize + gap)}px`;
+      
+      const fontSize = calculateFontSize(val, cellSize);
+      tile.style.fontSize = `${fontSize}px`;
+      tile.style.lineHeight = `${cellSize}px`;
+      
       tile.dataset.row = r;
       tile.dataset.col = c;
       tile.dataset.val = val;
-      
-      const uid = tileIdCounter++;
-      tile.dataset.key = `${r}-${c}-${val}-${uid}`;
+      tile.dataset.key = `${r}-${c}-${val}-${tileIdCounter++}`;
 
-      // Определяем тип анимации на основе изменений
       if (oldGrid) {
         const wasEmpty = (oldGrid[r][c] === 0);
-        const valueChanged = (oldGrid[r][c] !== val);
         const wasMerged = (oldGrid[r][c] !== 0 && val === oldGrid[r][c] * 2);
         
         if (wasEmpty) {
-          // Новая плитка - анимация появления
           tile.classList.add('new');
         } else if (wasMerged) {
-          // Плитка получилась в результате слияния
           tile.classList.add('merge');
         }
       } else {
-        // Первоначальное появление
         tile.classList.add('new');
       }
 
@@ -318,37 +327,96 @@ function renderGrid(oldGrid = null) {
   }
 }
 
+/* ======= УПРАВЛЕНИЕ УСТРОЙСТВАМИ ======= */
 
-/* ====== ПРОСТАЯ ДЕТЕКЦИЯ ====== */
+function isMobileDevice() {
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const isSmallScreen = window.innerWidth <= 1024;
+  
+  return isMobile || (hasTouch && isSmallScreen);
+}
 
 function updateMobileControlsVisibility() {
-  const mobileControls = document.getElementById('mobileControls');
-  const width = window.innerWidth;
+  const isMobile = isMobileDevice();
   
-  // Всё что меньше 1025px - показываем кнопки
-  if (width < 1025 && 
+  if (isMobile && 
       gameOverModal.classList.contains('hidden') && 
       leaderboardModal.classList.contains('hidden')) {
-    mobileControls.style.display = 'block';
+    mobileControls.classList.add('visible');
   } else {
-    mobileControls.style.display = 'none';
+    mobileControls.classList.remove('visible');
   }
 }
 
-// Обновляем при изменении размера
-window.addEventListener('resize', function() {
+/* ======= ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ======= */
+
+function startNewGame() {
+  grid = createEmptyGrid();
+  score = 0;
+  gameOver = false;
+  
+  const initial = Math.floor(Math.random() * 2) + 2;
+  spawnNewTiles(grid, initial);
+  saveUndoState();
+  saveGameState();
+  
   renderGrid();
+  hideGameOverModal();
   updateMobileControlsVisibility();
-});
+}
 
-window.addEventListener('orientationchange', function() {
-  setTimeout(() => {
-    renderGrid();
-    updateMobileControlsVisibility();
-  }, 100);
-});
+function performMove(direction) {
+  if (gameOver) return false;
+  
+  const oldGrid = cloneGrid(grid);
+  saveUndoState();
 
-// Обновляем при открытии/закрытии модальных окон
+  let result;
+  if (direction === 'left') result = moveLeft(grid);
+  else if (direction === 'right') result = moveRight(grid);
+  else if (direction === 'up') result = moveUp(grid);
+  else if (direction === 'down') result = moveDown(grid);
+  else return false;
+
+  if (!result.moved) {
+    return false;
+  }
+  
+  grid = result.grid;
+  score += result.gained;
+
+  const spawnCount = (Math.random() < 0.25) ? 2 : 1;
+  spawnNewTiles(grid, spawnCount);
+
+  if (!hasMoves(grid)) {
+    gameOver = true;
+    showGameOverModal();
+  }
+
+  saveGameState();
+  renderGrid(oldGrid);
+  return true;
+}
+
+function undoMove() {
+  if (gameOver) return;
+  const raw = loadUndoState();
+  if (!raw) {
+    alert('Нет доступного хода для отмены');
+    return;
+  }
+  
+  grid = raw.grid;
+  score = raw.score;
+  gameOver = raw.gameOver;
+  saveGameState();
+  renderGrid();
+}
+
+/* ======= МОДАЛЬНЫЕ ОКНА ======= */
+
 function showGameOverModal() {
   modalMessage.textContent = `Игра окончена — ваш счёт: ${score}`;
   saveRow.classList.remove('hidden');
@@ -356,12 +424,12 @@ function showGameOverModal() {
   playerNameInput.style.display = '';
   saveScoreBtn.style.display = '';
   gameOverModal.classList.remove('hidden');
-  updateMobileControlsVisibility(); // Обновляем видимость кнопок
+  updateMobileControlsVisibility();
 }
 
 function hideGameOverModal() {
   gameOverModal.classList.add('hidden');
-  updateMobileControlsVisibility(); // Обновляем видимость кнопок
+  updateMobileControlsVisibility();
 }
 
 function showLeaderboard() {
@@ -377,21 +445,16 @@ function showLeaderboard() {
     leadersTableBody.appendChild(tr);
   });
   leaderboardModal.classList.remove('hidden');
-  updateMobileControlsVisibility(); // Обновляем видимость кнопок
+  updateMobileControlsVisibility();
 }
 
 function hideLeaderboard() {
   leaderboardModal.classList.add('hidden');
-  updateMobileControlsVisibility(); // Обновляем видимость кнопок
+  updateMobileControlsVisibility();
 }
 
-// Инициализация
-document.addEventListener('DOMContentLoaded', function() {
-  initGame();
-  updateMobileControlsVisibility();
-});
+/* ======= ИНИЦИАЛИЗАЦИЯ И ОБРАБОТЧИКИ ======= */
 
-/* ====== ИНИЦИАЛИЗАЦИЯ И ОБРАБОТЧИКИ ====== */
 function initGame() {
   const ok = loadGameState();
   if (!ok) {
@@ -408,7 +471,7 @@ function initGame() {
   updateMobileControlsVisibility();
 }
 
-/* Save score from modal */
+/* Обработчики событий */
 saveScoreBtn.addEventListener('click', ()=>{
   const name = playerNameInput.value.trim() || '—';
   addLeader(name, score);
@@ -417,25 +480,24 @@ saveScoreBtn.addEventListener('click', ()=>{
   modalMessage.textContent = 'Ваш рекорд сохранён';
 });
 
-/* Кнопки модалки */
 modalRestartBtn.addEventListener('click', ()=>{
   hideGameOverModal();
   startNewGame();
 });
+
 modalCloseBtn.addEventListener('click', hideGameOverModal);
 
-/* Leaderboard buttons */
 leaderBtn.addEventListener('click', ()=>{
   showLeaderboard();
 });
+
 closeLeadersBtn.addEventListener('click', hideLeaderboard);
+
 clearLeadersBtn.addEventListener('click', ()=>{
-  // Убираем confirm и сразу очищаем
   saveLeaders([]);
-  showLeaderboard(); // Перерисовываем таблицу
+  showLeaderboard();
 });
 
-/* Навешивание кнопок UI */
 newGameBtn.addEventListener('click', ()=> startNewGame());
 undoBtn.addEventListener('click', ()=> undoMove());
 
@@ -445,7 +507,7 @@ leftBtn.addEventListener('click', () => performMove('left'));
 downBtn.addEventListener('click', () => performMove('down'));
 rightBtn.addEventListener('click', () => performMove('right'));
 
-/* Слушаем клавиатуру (desktop) */
+/* Клавиатура */
 window.addEventListener('keydown', (e)=>{
   if (leaderboardModal.classList.contains('hidden') === false) return;
   if (gameOver && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return;
@@ -455,14 +517,27 @@ window.addEventListener('keydown', (e)=>{
   else if (e.key === 'ArrowDown') { performMove('down'); e.preventDefault(); }
 });
 
-/* Обновляем видимость кнопок при изменении размера окна */
-window.addEventListener('resize', updateMobileControlsVisibility);
+/* Изменение размера окна */
+window.addEventListener('resize', function() {
+  renderGrid();
+  updateMobileControlsVisibility();
+});
 
-/* Сохранение состояния перед выгрузкой */
+window.addEventListener('orientationchange', function() {
+  setTimeout(() => {
+    renderGrid();
+    updateMobileControlsVisibility();
+  }, 100);
+});
+
+/* Сохранение состояния */
 window.addEventListener('beforeunload', ()=>{
   saveGameState();
   try { localStorage.setItem(UNDO_KEY, JSON.stringify(undoState)); } catch (e) {}
 });
 
-/* Инициализация игры при загрузке страницы */
-document.addEventListener('DOMContentLoaded', initGame);
+/* Запуск игры */
+document.addEventListener('DOMContentLoaded', function() {
+  initGame();
+  updateMobileControlsVisibility();
+});
