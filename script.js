@@ -327,15 +327,11 @@ function renderGrid(oldGrid = null) {
   }
 }
 
-/* ======= УПРАВЛЕНИЕ УСТРОЙСТВАМИ ======= */
+/* ======= ПРОСТАЯ И НАДЕЖНАЯ ДЕТЕКЦИЯ ======= */
 
 function isMobileDevice() {
-  const userAgent = navigator.userAgent.toLowerCase();
-  const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  const isSmallScreen = window.innerWidth <= 1024;
-  
-  return isMobile || (hasTouch && isSmallScreen);
+  // Просто проверяем наличие тач-экрана
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 }
 
 function updateMobileControlsVisibility() {
@@ -348,6 +344,8 @@ function updateMobileControlsVisibility() {
   } else {
     mobileControls.classList.remove('visible');
   }
+  
+  console.log('Touch device:', isMobile, 'Controls visible:', mobileControls.classList.contains('visible'));
 }
 
 /* ======= ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ======= */
