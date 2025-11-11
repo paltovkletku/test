@@ -280,7 +280,7 @@ main {
   text-align: center;
 }
 
-/* Мобильные кнопки управления - ИСПРАВЛЕННЫЕ СТИЛИ */
+/* Мобильные кнопки управления */
 .mobile-controls {
   position: fixed;
   bottom: 20px;
@@ -301,6 +301,13 @@ main {
 
 .mobile-controls.hidden {
   display: none !important;
+}
+
+/* На ПК всегда скрываем кнопки */
+@media (min-width: 1025px) {
+  .mobile-controls {
+    display: none !important;
+  }
 }
 
 .controls-row {
@@ -357,10 +364,6 @@ main {
 }
 
 @media (max-width: 768px) {
-  .mobile-controls {
-    display: block !important;
-  }
-  
   .header h1 { font-size: 24px; }
   .score-box > div:last-child { font-size: 18px; }
   
@@ -416,12 +419,5 @@ main {
     padding: 8px 12px;
     min-width: 80px;
     font-size: 13px;
-  }
-}
-
-/* На больших экранах скрываем мобильные кнопки */
-@media (min-width: 1025px) {
-  .mobile-controls {
-    display: none !important;
   }
 }
