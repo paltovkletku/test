@@ -116,14 +116,102 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
 .info { max-width:360px; font-size:14px; color:#5f454f; }
 .footer { max-width:1100px; margin:18px auto; padding:0 16px; display:flex; gap:18px; justify-content:space-between; color:#6f5660; font-size:13px; }
 
-/* Responsive */
-@media (max-width:900px) {
-  :root { --grid-size: 420px; }
-  .game-area { flex-direction:column; align-items:center; }
+/* Мобильные кнопки управления */
+.mobile-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
 }
-@media (max-width:420px) {
+
+.controls-row {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.controls-row:last-child {
+  margin-bottom: 0;
+}
+
+.control-btn {
+  width: 60px;
+  height: 60px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f9d5e4, #f2a7c9);
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.control-btn:active {
+  transform: scale(0.95);
+  background: linear-gradient(180deg, #f2a7c9, #ee7dae);
+}
+
+/* Класс для скрытия элементов */
+.hidden { display: none !important; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  :root { --grid-size: 420px; }
+  .game-area { flex-direction: column; align-items: center; }
+}
+
+@media (max-width: 767px) {
+  /* На мобильных устройствах скрываем информационный блок и показываем кнопки */
+  .mobile-controls:not(.hidden) {
+    display: block;
+  }
+  
+  .info {
+    display: none;
+  }
+  
+  .game-area {
+    margin-bottom: 120px; /* Место для кнопок */
+  }
+}
+
+@media (min-width: 768px) {
+  /* На десктопе скрываем мобильные кнопки */
+  .mobile-controls {
+    display: none !important;
+  }
+}
+
+@media (max-width: 420px) {
   :root { --grid-size: 92vw; }
-  .header h1 { font-size:20px; }
-  .score-box > div:last-child { font-size:16px; }
-  .tile { font-size:18px; }
+  .header h1 { font-size: 20px; }
+  .score-box > div:last-child { font-size: 16px; }
+  .tile { font-size: 18px; }
+  
+  /* Уменьшаем кнопки на очень маленьких экранах */
+  .control-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
+  .mobile-controls {
+    padding: 12px;
+  }
+  
+  .controls-row {
+    gap: 12px;
+  }
 }
