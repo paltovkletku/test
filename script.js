@@ -46,21 +46,6 @@ let undoState = null;
 /* Уникальные id для DOM-плиток */
 let tileIdCounter = 1;
 
-
-// Для отслеживания слияний
-function getMergedPositions(oldGrid, newGrid) {
-  const merged = [];
-  for (let r = 0; r < SIZE; r++) {
-    for (let c = 0; c < SIZE; c++) {
-      // Если в новой сетке значение больше чем в старой и это не 0
-      if (newGrid[r][c] > oldGrid[r][c] && oldGrid[r][c] !== 0) {
-        merged.push({ r, c });
-      }
-    }
-  }
-  return merged;
-}
-
 /* Инициализация интерфейса: создаём визуальные ячейки (фон) динамически */
 function createGridUI() {
   // Очистка
@@ -274,22 +259,11 @@ function spawnNewTiles(board, count=1) {
   return board;
 }
 
+
 /* ====== Рендеринг плиток (DOM) ====== */
-function renderGrid(oldGrid = null, mergedPositions = null) {
+function renderGrid(oldGrid = null) {
   // Обновляем счет
   scoreEl.textContent = String(score);
-
-  // Сохраняем старые позиции плиток для анимации
-  const oldTilePositions = new Map();
-  Array.from(tilesLayer.children).forEach(el => {
-    const row = parseInt(el.dataset.row);
-    const col = parseInt(el.dataset.col);
-    const key = `${row}-${col}`;
-    oldTilePositions.set(key, {
-      element: el,
-      rect: el.getBoundingClientRect()
-    });
-  });
 
   // Очистим слой
   while (tilesLayer.firstChild) tilesLayer.removeChild(tilesLayer.firstChild);
@@ -323,53 +297,18 @@ function renderGrid(oldGrid = null, mergedPositions = null) {
       tile.dataset.key = `${r}-${c}-${val}-${uid}`;
 
       // Анимация появления новых плиток
-      const oldKey = `${r}-${c}`;
       if (oldGrid && oldGrid[r][c] === 0) {
         tile.classList.add('new');
-      }
-
-      // Анимация движения - находим откуда двигалась плитка
-      if (oldTilePositions.has(oldKey)) {
-        const oldTile = oldTilePositions.get(oldKey);
-        const oldRect = oldTile.rect;
-        const newRect = {
-          left: gap + c * (cellSize + gap),
-          top: gap + r * (cellSize + gap)
-        };
-        
-        const dx = oldRect.left - (gridRect.left + newRect.left);
-        const dy = oldRect.top - (gridRect.top + newRect.top);
-        
-        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-          tile.style.transform = `translate(${dx}px, ${dy}px)`;
-          tile.style.transition = 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)';
-          
-          // Запускаем анимацию после добавления в DOM
-          requestAnimationFrame(() => {
-            tile.style.transform = '';
-          });
-        }
-      } else if (!oldGrid || oldGrid[r][c] === 0) {
-        // Новая плитка
+      } else if (!oldGrid) {
+        // Первоначальное появление
         tile.classList.add('new');
       }
 
       tilesLayer.appendChild(tile);
     }
   }
-
-  // Анимация слияния
-  if (mergedPositions && mergedPositions.length) {
-    mergedPositions.forEach(pos => {
-      Array.from(tilesLayer.children).forEach(el => {
-        if (Number(el.dataset.row) === pos.r && Number(el.dataset.col) === pos.c) {
-          el.classList.add('merge');
-          setTimeout(() => el.classList.remove('merge'), 400);
-        }
-      });
-    });
-  }
 }
+
 
 /* ====== Управление видимостью мобильных кнопок ====== */
 function isMobileDevice() {
@@ -537,14 +476,15 @@ modalRestartBtn.addEventListener('click', ()=>{
 modalCloseBtn.addEventListener('click', hideGameOverModal);
 
 /* Leaderboard buttons */
+/* Leaderboard buttons */
 leaderBtn.addEventListener('click', ()=>{
   showLeaderboard();
 });
 closeLeadersBtn.addEventListener('click', hideLeaderboard);
 clearLeadersBtn.addEventListener('click', ()=>{
-  if (!confirm('Очистить таблицу лидеров?')) return;
+  // Убираем confirm и сразу очищаем
   saveLeaders([]);
-  showLeaderboard();
+  showLeaderboard(); // Перерисовываем таблицу
 });
 
 /* Навешивание кнопок UI */
