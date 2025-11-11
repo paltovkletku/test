@@ -330,58 +330,25 @@ function renderGrid(oldGrid = null) {
 /* ======= УПРАВЛЕНИЕ УСТРОЙСТВАМИ ======= */
 
 function isMobileDevice() {
-  // 1. Проверяем User Agent
-  const userAgent = navigator.userAgent.toLowerCase();
-  const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-  
-  // 2. Проверяем тач-события
-  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  
-  // 3. Проверяем размер экрана и ориентацию
-  const isSmallScreen = window.innerWidth <= 1024;
-  const isPortrait = window.innerHeight > window.innerWidth;
-  
-  // 4. Проверяем возможности указателя
-  const hasCoarsePointer = matchMedia('(pointer: coarse)').matches;
-  const hasFinePointer = matchMedia('(pointer: fine)').matches;
-  
-  // 5. Дополнительные проверки для современных браузеров
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-  const isMobileView = window.innerWidth <= 768;
-  
-  console.log('Device detection:', {
-    userAgent: navigator.userAgent,
-    isMobileUA,
-    hasTouch,
-    isSmallScreen,
-    hasCoarsePointer,
-    hasFinePointer,
-    isStandalone,
-    isMobileView,
-    width: window.innerWidth,
-    height: window.innerHeight
-  });
-  
-  // Логика определения:
-  // - Если это мобильное устройство по User Agent ИЛИ
-  // - Есть тач-экран И (небольшой экран ИЛИ грубый указатель) ИЛИ
-  // - Режим standalone (PWA) И небольшой экран
-  return isMobileUA || 
-         (hasTouch && (isSmallScreen || hasCoarsePointer)) || 
-         (isStandalone && isMobileView);
+  // Простая и надежная проверка
+  return (
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints && navigator.maxTouchPoints > 2) ||
+    (window.innerWidth <= 768)
+  );
 }
 
 function updateMobileControlsVisibility() {
   const isMobile = isMobileDevice();
+  const modalsOpen = !gameOverModal.classList.contains('hidden') || 
+                     !leaderboardModal.classList.contains('hidden');
   
-  console.log('Show mobile controls:', isMobile);
-  
-  if (isMobile && 
-      gameOverModal.classList.contains('hidden') && 
-      leaderboardModal.classList.contains('hidden')) {
+  if (isMobile && !modalsOpen) {
     mobileControls.classList.add('visible');
+    mobileControls.classList.remove('hidden');
   } else {
     mobileControls.classList.remove('visible');
+    mobileControls.classList.add('hidden');
   }
 }
 
@@ -432,6 +399,7 @@ function performMove(direction) {
 
   saveGameState();
   renderGrid(oldGrid);
+  updateMobileControlsVisibility();
   return true;
 }
 
@@ -448,6 +416,7 @@ function undoMove() {
   gameOver = raw.gameOver;
   saveGameState();
   renderGrid();
+  updateMobileControlsVisibility();
 }
 
 /* ======= МОДАЛЬНЫЕ ОКНА ======= */
@@ -555,14 +524,14 @@ window.addEventListener('keydown', (e)=>{
 /* Изменение размера окна */
 window.addEventListener('resize', function() {
   renderGrid();
-  updateMobileControlsVisibility();
+  setTimeout(updateMobileControlsVisibility, 100);
 });
 
 window.addEventListener('orientationchange', function() {
   setTimeout(() => {
     renderGrid();
     updateMobileControlsVisibility();
-  }, 100);
+  }, 300);
 });
 
 /* Сохранение состояния */
@@ -574,5 +543,6 @@ window.addEventListener('beforeunload', ()=>{
 /* Запуск игры */
 document.addEventListener('DOMContentLoaded', function() {
   initGame();
-  updateMobileControlsVisibility();
+  // Дополнительная проверка через секунду на всякий случай
+  setTimeout(updateMobileControlsVisibility, 1000);
 });
