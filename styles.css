@@ -17,7 +17,7 @@ html,body {
   background: linear-gradient(180deg,#fff6fb, #fff0f8); 
 }
 
-/* Новый layout для header */
+/* Header */
 .header { 
   display:flex; 
   align-items:center; 
@@ -36,7 +36,7 @@ html,body {
   font-weight: 600;
 }
 
-/* Контейнер для элементов управления */
+/* Элементы управления */
 .controls-top { 
   display:flex; 
   align-items:center; 
@@ -115,11 +115,11 @@ main {
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
-/* Контейнер игры - ФИКСИРУЕМ РАЗМЕРЫ */
+/* Игровое поле */
 .game-container { 
-  width: min(var(--grid-size), 90vw, 90vh - 200px); /* Ограничиваем максимальный размер */
+  width: min(var(--grid-size), 90vw, 90vh - 200px);
   background: linear-gradient(180deg,#fff3f8,#fff7fb); 
-  padding: min(20px, 3vw); /* Адаптивные отступы */
+  padding: min(20px, 3vw);
   border-radius:16px; 
   position:relative; 
   box-shadow: 0 8px 30px rgba(144,74,112,0.12); 
@@ -133,14 +133,14 @@ main {
   display:grid;
   grid-template-columns: repeat(4,1fr);
   grid-template-rows: repeat(4,1fr);
-  gap: min(var(--tile-gap), 2vw); /* Адаптивный gap */
-  padding: min(var(--tile-gap), 2vw); /* Адаптивный padding */
+  gap: min(var(--tile-gap), 2vw);
+  padding: min(var(--tile-gap), 2vw);
   position:relative;
   overflow:hidden;
   box-sizing:border-box;
 }
 
-/* ячейки фона */
+/* Ячейки фона */
 .grid .cell {
   background: rgba(255,255,255,0.08);
   border-radius:8px;
@@ -148,14 +148,14 @@ main {
   height:100%;
 }
 
-/* слой плиток - ФИКСИРУЕМ ПОЗИЦИОНИРОВАНИЕ */
+/* Слой плиток */
 .tiles-layer { 
   position:absolute; 
-  inset: min(20px, 3vw); /* Адаптивные отступы */
+  inset: min(20px, 3vw);
   pointer-events:none; 
 }
 
-/* Плитка с АБСОЛЮТНО АДАПТИВНЫМИ РАЗМЕРАМИ */
+/* Плитки */
 .tile {
   position:absolute;
   display:flex;
@@ -163,12 +163,10 @@ main {
   justify-content:center;
   font-weight:600;
   border-radius:8px;
-  /* Размеры рассчитываются динамически в JS */
   box-sizing:border-box;
-  padding: 0; /* Убираем фиксированные padding */
+  padding: 0;
   z-index: 2;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  /* Шрифт будет устанавливаться в JS */
 }
 
 /* Цвета плиток */
@@ -217,7 +215,7 @@ main {
   }
 }
 
-/* Модалки */
+/* Модальные окна */
 .modal { 
   position:fixed; 
   inset:0; 
@@ -253,7 +251,7 @@ main {
   margin-top:16px; 
 }
 
-/* Лидерборд */
+/* Таблица лидеров */
 .leaders-table { 
   width:100%; 
   border-collapse:collapse; 
@@ -281,7 +279,8 @@ main {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
 }
-/* Мобильные кнопки управления - ПРОСТАЯ ЛОГИКА */
+
+/* Мобильные кнопки управления */
 .mobile-controls {
   position: fixed;
   bottom: 20px;
@@ -293,7 +292,11 @@ main {
   border-radius: 16px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
-  display: none; /* По умолчанию скрыто */
+  display: none;
+}
+
+.mobile-controls.visible {
+  display: block;
 }
 
 .controls-row {
@@ -330,7 +333,9 @@ main {
   background: linear-gradient(180deg, #f2a7c9, #ee7dae);
 }
 
-/* Responsive */
+.hidden { display: none !important; }
+
+/* Адаптивность */
 @media (max-width: 900px) {
   .game-area { 
     flex-direction: column; 
@@ -343,121 +348,6 @@ main {
   }
   .header h1 {
     font-size: 28px;
-  }
-}
-
-/* Все что меньше 1024px - показываем кнопки */
-@media (max-width: 1024px) {
-  .mobile-controls {
-    display: block;
-  }
-  
-  .info {
-    display: none;
-  }
-  
-  .game-area {
-    margin-bottom: 140px;
-  }
-  
-  .header {
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .controls-top {
-    order: 2;
-  }
-  
-  .header h1 {
-    order: 1;
-  }
-}
-
-/* Десктоп */
-@media (min-width: 1025px) {
-  .mobile-controls {
-    display: none !important;
-  }
-}
-
-/* Маленькие экраны */
-@media (max-width: 480px) {
-  .header h1 { font-size: 24px; }
-  .score-box > div:last-child { font-size: 18px; }
-  
-  .control-btn {
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
-  }
-  
-  .mobile-controls {
-    padding: 12px;
-  }
-  
-  .controls-row {
-    gap: 12px;
-  }
-  
-  .modal-content {
-    padding: 20px;
-  }
-  
-  .btn {
-    padding: 8px 14px;
-    min-width: 90px;
-    font-size: 14px;
-  }
-}
-
-
-/* Responsive - УПРОЩАЕМ */
-@media (max-width: 900px) {
-  .game-area { 
-    flex-direction: column; 
-    align-items: center; 
-    gap: 30px;
-  }
-  .header {
-    gap: 20px;
-    padding: 15px;
-  }
-  .header h1 {
-    font-size: 28px;
-  }
-}
-
-@media (max-width: 768px) {
-  .mobile-controls.visible {
-    display: block;
-  }
-  
-  .info {
-    display: none;
-  }
-  
-  .game-area {
-    margin-bottom: 140px;
-  }
-  
-  .header {
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .controls-top {
-    order: 2;
-  }
-  
-  .header h1 {
-    order: 1;
-  }
-}
-
-@media (min-width: 769px) {
-  .mobile-controls {
-    display: none !important;
   }
 }
 
