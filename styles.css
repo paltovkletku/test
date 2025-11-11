@@ -281,7 +281,6 @@ main {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
 }
-
 /* Мобильные кнопки управления - ПРОСТАЯ ЛОГИКА */
 .mobile-controls {
   position: fixed;
@@ -295,10 +294,6 @@ main {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
   display: none; /* По умолчанию скрыто */
-}
-
-.mobile-controls.visible {
-  display: block; /* Показываем когда нужно */
 }
 
 .controls-row {
@@ -335,7 +330,87 @@ main {
   background: linear-gradient(180deg, #f2a7c9, #ee7dae);
 }
 
-.hidden { display: none !important; }
+/* Responsive */
+@media (max-width: 900px) {
+  .game-area { 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 30px;
+  }
+  .header {
+    gap: 20px;
+    padding: 15px;
+  }
+  .header h1 {
+    font-size: 28px;
+  }
+}
+
+/* Все что меньше 1024px - показываем кнопки */
+@media (max-width: 1024px) {
+  .mobile-controls {
+    display: block;
+  }
+  
+  .info {
+    display: none;
+  }
+  
+  .game-area {
+    margin-bottom: 140px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .controls-top {
+    order: 2;
+  }
+  
+  .header h1 {
+    order: 1;
+  }
+}
+
+/* Десктоп */
+@media (min-width: 1025px) {
+  .mobile-controls {
+    display: none !important;
+  }
+}
+
+/* Маленькие экраны */
+@media (max-width: 480px) {
+  .header h1 { font-size: 24px; }
+  .score-box > div:last-child { font-size: 18px; }
+  
+  .control-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
+  .mobile-controls {
+    padding: 12px;
+  }
+  
+  .controls-row {
+    gap: 12px;
+  }
+  
+  .modal-content {
+    padding: 20px;
+  }
+  
+  .btn {
+    padding: 8px 14px;
+    min-width: 90px;
+    font-size: 14px;
+  }
+}
+
 
 /* Responsive - УПРОЩАЕМ */
 @media (max-width: 900px) {
