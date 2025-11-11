@@ -1,311 +1,177 @@
-const LOCAL_STORAGE_KEY = 'todo_lab_v1';
+/* JS перенесён из <script> в index.html */
+// === 2048 GAME LOGIC ===
+const boardSize = 4;
+let board = [];
+let history = []; // undo stack
+let score = 0;
+let best = Number(localStorage.getItem('bestScore') || 0);
+const grid = document.getElementById('grid');
+const scoreEl = document.getElementById('score');
+const bestEl = document.getElementById('best');
+const overlay = document.getElementById('overlay');
+const inputName = document.getElementById('player');
+const saveScoreBtn = document.getElementById('save');
+const restartBtn = document.getElementById('restart');
+const undoBtn = document.getElementById('undo');
+const lbBtn = document.getElementById('openLB');
+const closeLB = document.getElementById('closeLB');
+const lbModal = document.getElementById('leaderboard');
+const lbList = document.getElementById('lbList');
 
-let taskList = [];
-
-let sortAscending = true;
-let currentFilter = 'all';
-let searchText = '';
-
-function loadTasks() {
-  const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-  taskList = saved ? JSON.parse(saved) : [];
-}
-
-function saveTasks() {
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(taskList));
-}
-
-function generateTaskId() {
-  return Date.now() + Math.random().toString().substring(2, 5);
-}
-
-// интерфейс
-const container = document.createElement('div');
-container.className = 'container';
-document.body.appendChild(container);
-
-const pageTitle = document.createElement('h1');
-pageTitle.textContent = 'Список дел';
-container.appendChild(pageTitle);
-
-const controlPanel = document.createElement('div');
-controlPanel.className = 'controls';
-container.appendChild(controlPanel);
-
-const searchInput = document.createElement('input');
-searchInput.placeholder = 'Поиск...';
-controlPanel.appendChild(searchInput);
-
-const filterSelect = document.createElement('select');
-[
-  { value: 'all', text: 'Все' },
-  { value: 'active', text: 'Активные' },
-  { value: 'done', text: 'Выполненные' }
-].forEach(opt => {
-  const option = document.createElement('option');
-  option.value = opt.value;
-  option.textContent = opt.text;
-  filterSelect.appendChild(option);
-});
-controlPanel.appendChild(filterSelect);
-
-const sortButton = document.createElement('button');
-sortButton.textContent = 'Сортировать ↑';
-controlPanel.appendChild(sortButton);
-
-const addForm = document.createElement('form');
-addForm.className = 'form-row';
-container.appendChild(addForm);
-
-const newTaskInput = document.createElement('input');
-newTaskInput.placeholder = 'Новая задача';
-newTaskInput.required = true;
-addForm.appendChild(newTaskInput);
-
-const newTaskDate = document.createElement('input');
-newTaskDate.type = 'date';
-addForm.appendChild(newTaskDate);
-
-const addTaskButton = document.createElement('button');
-addTaskButton.type = 'submit';
-addTaskButton.textContent = 'Добавить';
-addForm.appendChild(addTaskButton);
-
-const taskListElement = document.createElement('ul');
-taskListElement.className = 'list';
-container.appendChild(taskListElement);
-
-const emptyMessage = document.createElement('div');
-emptyMessage.className = 'empty-note';
-emptyMessage.textContent = 'Нет задач...';
-container.appendChild(emptyMessage);
-
-function buildTaskItem(task) {
-  const li = document.createElement('li');
-  li.className = 'task-item';
-  li.dataset.id = task.id;
-  li.draggable = true;
-
-  if (task.done) li.classList.add('done');
-
-  const checkButton = document.createElement('button');
-  checkButton.className = 'checkbox';
-  checkButton.textContent = task.done ? '✓' : '';
-  li.appendChild(checkButton);
-
-  const infoBlock = document.createElement('div');
-  li.appendChild(infoBlock);
-
-  const titleDiv = document.createElement('div');
-  titleDiv.className = 'task-title';
-  titleDiv.textContent = task.title;
-  infoBlock.appendChild(titleDiv);
-
-  const dateDiv = document.createElement('div');
-  dateDiv.className = 'task-meta';
-  dateDiv.textContent = task.date || 'Без даты';
-  infoBlock.appendChild(dateDiv);
-
-  const editButton = document.createElement('button');
-  editButton.textContent = 'Изменить';
-  li.appendChild(editButton);
-
-  const deleteButton = document.createElement('button');
-  deleteButton.textContent = 'Удалить';
-  li.appendChild(deleteButton);
-
-  checkButton.onclick = () => toggleTaskDone(task.id);
-  deleteButton.onclick = () => deleteTask(task.id);
-  editButton.onclick = () => openEditModal(task);
-
-  return li;
-}
-
-function updateTaskList() {
-  // Очищаем список перед перерисовкой
-  while (taskListElement.firstChild) {
-    taskListElement.removeChild(taskListElement.firstChild);
-  }
-
-  // Копируем массив задач, чтобы не трогать оригинал
-  let visibleTasks = taskList.slice();
-
-  // === Поиск ===
-  if (searchText.trim()) {
-    const query = searchText.trim().toLowerCase();
-    visibleTasks = visibleTasks.filter(task =>
-      task.title && task.title.toLowerCase().includes(query)
-    );
-  }
-
-  // === Фильтрация по статусу ===
-  if (currentFilter === 'active') {
-    visibleTasks = visibleTasks.filter(task => !task.done);
-  } else if (currentFilter === 'done') {
-    visibleTasks = visibleTasks.filter(task => task.done);
-  }
-
-  // === Сортировка по дате ===
-  visibleTasks.sort((a, b) => {
-    if (!a.date) return 1;
-    if (!b.date) return -1;
-    return a.date.localeCompare(b.date);
-  });
-
-  if (!sortAscending) {
-    visibleTasks.reverse();
-  }
-
-  // === Сообщение, если задач нет ===
-  emptyMessage.style.display = visibleTasks.length === 0 ? 'block' : 'none';
-
-  // === Рендерим задачи ===
-  visibleTasks.forEach(task => {
-    taskListElement.appendChild(buildTaskItem(task));
-  });
-}
-
-function addTask(title, date) {
-  taskList.push({
-    id: generateTaskId(),
-    title,
-    date,
-    done: false
-  });
-  saveTasks();
-  updateTaskList();
-}
-
-function deleteTask(id) {
-  taskList = taskList.filter(t => t.id !== id);
-  saveTasks();
-  updateTaskList();
-}
-
-function toggleTaskDone(id) {
-  const task = taskList.find(t => t.id === id);
-  if (task) {
-    task.done = !task.done;
-    saveTasks();
-    updateTaskList();
-  }
-}
-
-const modalOverlay = document.createElement('div');
-modalOverlay.className = 'modal-overlay';
-
-const modalWindow = document.createElement('div');
-modalWindow.className = 'modal-window';
-
-const modalTitle = document.createElement('h3');
-modalTitle.textContent = 'Редактирование';
-modalWindow.appendChild(modalTitle);
-
-const modalContent = document.createElement('div');
-modalContent.className = 'modal-content';
-modalWindow.appendChild(modalContent);
-
-const modalTaskTitle = document.createElement('input');
-modalTaskTitle.className = 'modal-input';
-modalTaskTitle.placeholder = 'Название';
-modalContent.appendChild(modalTaskTitle);
-
-const modalTaskDate = document.createElement('input');
-modalTaskDate.className = 'modal-input';
-modalTaskDate.type = 'date';
-modalContent.appendChild(modalTaskDate);
-
-const modalButtons = document.createElement('div');
-modalButtons.className = 'modal-buttons';
-modalWindow.appendChild(modalButtons);
-
-const modalSaveButton = document.createElement('button');
-modalSaveButton.textContent = 'Сохранить';
-modalButtons.appendChild(modalSaveButton);
-
-const modalCancelButton = document.createElement('button');
-modalCancelButton.textContent = 'Отмена';
-modalButtons.appendChild(modalCancelButton);
-
-modalOverlay.appendChild(modalWindow);
-document.body.appendChild(modalOverlay);
-
-let currentTaskToEdit = null;
-
-function openEditModal(task) {
-  currentTaskToEdit = task;
-  modalTaskTitle.value = task.title;
-  modalTaskDate.value = task.date || '';
-  modalOverlay.style.display = 'flex';
-}
-
-function closeEditModal() {
-  modalOverlay.style.display = 'none';
-  currentTaskToEdit = null;
-}
-
-modalCancelButton.onclick = closeEditModal;
-
-modalSaveButton.onclick = function () {
-  if (currentTaskToEdit) {
-    const newTitle = modalTaskTitle.value.trim();
-    if (newTitle) {
-      currentTaskToEdit.title = newTitle;
+// no innerHTML — only createElement
+function createGrid() {
+    for (let i = 0; i < 16; i++) {
+        const cell = document.createElement('div');
+        cell.className = "cell";
+        grid.appendChild(cell);
     }
-    currentTaskToEdit.date = modalTaskDate.value || null;
-    saveTasks();
-    updateTaskList();
-  }
-  closeEditModal();
-};
+}
 
-addForm.onsubmit = e => {
-  e.preventDefault();
-  addTask(newTaskInput.value, newTaskDate.value);
-  newTaskInput.value = '';
-  newTaskDate.value = '';
-  newTaskInput.focus();
-};
+function getEmpty() {
+    const empty = [];
+    for (let r = 0; r < boardSize; r++) {
+        for (let c = 0; c < boardSize; c++) {
+            if (board[r][c] === 0) empty.push({ r, c });
+        }
+    }
+    return empty;
+}
 
-searchInput.oninput = () => {
-  searchText = searchInput.value;
-  updateTaskList();
-};
+function addTile(count = 1) {
+    const empty = getEmpty();
+    if (empty.length === 0) return;
+    count = Math.min(count, empty.length);
+    for (let i = 0; i < count; i++) {
+        const { r, c } = empty[Math.floor(Math.random() * empty.length)];
+        board[r][c] = Math.random() < 0.9 ? 2 : 4;
+    }
+}
 
-filterSelect.onchange = () => {
-  currentFilter = filterSelect.value;
-  updateTaskList();
-};
+function saveState() {
+    history.push(JSON.parse(JSON.stringify(board)));
+}
+function undo() {
+    if (history.length === 0 || overlay.style.display !== "none") return;
+    board = history.pop();
+    render();
+}
 
-sortButton.onclick = () => {
-  sortAscending = !sortAscending;
-  sortButton.textContent = sortAscending ? 'Сортировать ↑' : 'Сортировать ↓';
-  updateTaskList();
-};
+function moveLeft() { return moveCore((r) => r); }
+function moveRight() { return moveCore((r) => r.reverse()); }
+function moveUp() { return transpose(moveLeft()); }
+function moveDown() { return transpose(moveRight()); }
 
-taskListElement.addEventListener('dragstart', e => {
-  e.target.classList.add('dragging');
+function transpose(fn) {
+    board = board[0].map((_, c) => board.map(row => row[c]));
+    const changed = fn;
+    board = board[0].map((_, c) => board.map(row => row[c]));
+    return changed;
+}
+
+function moveCore(mapFn) {
+    let changed = false;
+    for (let r = 0; r < boardSize; r++) {
+        const row = mapFn([...board[r]]);
+        const filtered = row.filter(x => x !== 0);
+        const merged = [];
+        for (let i = 0; i < filtered.length; i++) {
+            if (filtered[i] === filtered[i + 1]) {
+                const val = filtered[i] * 2;
+                score += val;
+                merged.push(val);
+                i++;
+            } else merged.push(filtered[i]);
+        }
+        while (merged.length < boardSize) merged.push(0);
+        const newRow = mapFn([...merged]);
+        if (newRow.some((v, i) => v !== board[r][i])) changed = true;
+        board[r] = newRow;
+    }
+    if (changed) {
+        saveState();
+        addTile(1 + (Math.random() < 0.3));
+        render();
+    }
+    checkGameOver();
+    return changed;
+}
+
+// Render
+function render() {
+    scoreEl.textContent = score;
+    bestEl.textContent = best;
+    document.querySelectorAll('.tile').forEach(t => t.remove());
+    board.forEach((row, r) => {
+        row.forEach((v, c) => {
+            if (v === 0) return;
+            const tile = document.createElement('div');
+            tile.className = `tile v${v}`;
+            tile.textContent = v;
+            tile.style.transform = `translate(${c * 92}px, ${r * 92}px)`;
+            grid.parentNode.appendChild(tile);
+        });
+    });
+}
+
+// Game Over
+function checkGameOver() {
+    for (let r = 0; r < boardSize; r++)
+        for (let c = 0; c < boardSize; c++)
+            if (board[r][c] === 0)
+                return;
+    const clone = JSON.parse(JSON.stringify(board));
+    if (moveLeft() || moveRight() || moveUp() || moveDown()) {
+        board = clone; return;
+    }
+    overlay.style.display = "flex";
+}
+
+// Leaderboard
+function saveScore() {
+    const name = inputName.value.trim();
+    if (!name) return;
+    const data = JSON.parse(localStorage.getItem('leaderboard') || "[]");
+    data.push({ name, score, date: new Date().toLocaleString() });
+    data.sort((a,b) => b.score - a.score);
+    localStorage.setItem('leaderboard', JSON.stringify(data.slice(0,10)));
+    inputName.style.display = "none";
+    saveScoreBtn.textContent = "Сохранено";
+}
+function renderLB() {
+    lbList.innerHTML = "";
+    const data = JSON.parse(localStorage.getItem('leaderboard') || "[]");
+    data.forEach(r => {
+        const row = document.createElement('div');
+        row.className = "row";
+        row.textContent = `${r.name} — ${r.score} — ${r.date}`;
+        lbList.appendChild(row);
+    });
+}
+
+function restart() {
+    score = 0;
+    history = [];
+    board = [...Array(boardSize)].map(() => Array(boardSize).fill(0));
+    addTile(2);
+    overlay.style.display = "none";
+    render();
+}
+
+// Controls
+undoBtn.onclick = undo;
+restartBtn.onclick = restart;
+saveScoreBtn.onclick = saveScore;
+lbBtn.onclick = () => { renderLB(); lbModal.style.display = "block"};
+closeLB.onclick = () => lbModal.style.display = "none";
+
+document.addEventListener('keydown', (e) => {
+    if (overlay.style.display !== "none") return;
+    if (e.key === 'ArrowLeft') moveLeft();
+    if (e.key === 'ArrowRight') moveRight();
+    if (e.key === 'ArrowUp') moveUp();
+    if (e.key === 'ArrowDown') moveDown();
 });
 
-taskListElement.addEventListener('dragend', e => {
-  e.target.classList.remove('dragging');
-  const newOrder = [];
-  taskListElement.querySelectorAll('.task-item').forEach(li => {
-    const task = taskList.find(t => t.id === li.dataset.id);
-    if (task) newOrder.push(task);
-  });
-  taskList = newOrder;
-  saveTasks();
-});
-
-taskListElement.addEventListener('dragover', e => {
-  e.preventDefault();
-  const dragging = taskListElement.querySelector('.dragging');
-  const afterElement = [...taskListElement.children].find(li => {
-    return e.clientY <= li.getBoundingClientRect().top + li.offsetHeight / 2;
-  });
-  taskListElement.insertBefore(dragging, afterElement);
-});
-
-loadTasks();
-updateTaskList();
+// Start game
+createGrid();
+restart();
