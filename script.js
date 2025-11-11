@@ -318,97 +318,37 @@ function renderGrid(oldGrid = null) {
   }
 }
 
-/* ====== Управление видимостью мобильных кнопок ====== */
-function isMobileDevice() {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-         window.innerWidth <= 768;
-}
+
+/* ====== ПРОСТАЯ ДЕТЕКЦИЯ ====== */
 
 function updateMobileControlsVisibility() {
-  if (isMobileDevice() && 
+  const mobileControls = document.getElementById('mobileControls');
+  const width = window.innerWidth;
+  
+  // Всё что меньше 1025px - показываем кнопки
+  if (width < 1025 && 
       gameOverModal.classList.contains('hidden') && 
       leaderboardModal.classList.contains('hidden')) {
-    mobileControls.classList.remove('hidden');
+    mobileControls.style.display = 'block';
   } else {
-    mobileControls.classList.add('hidden');
+    mobileControls.style.display = 'none';
   }
 }
 
-function startNewGame() {
-  grid = createEmptyGrid();
-  score = 0;
-  gameOver = false;
-  // ГАРАНТИРУЕМ минимум 2 плитки в начале игры
-  const initial = Math.floor(Math.random() * 2) + 2; // всегда 2 или 3 плитки
-  spawnNewTiles(grid, initial);
-  saveUndoState(); // сохраняем начальное для отмены
-  saveGameState();
-  
+// Обновляем при изменении размера
+window.addEventListener('resize', function() {
   renderGrid();
-  hideGameOverModal();
   updateMobileControlsVisibility();
-}
+});
 
-function performMove(direction) {
-  if (gameOver) return false;
-  
-  // Сохраняем текущее состояние для анимации
-  const oldGrid = cloneGrid(grid);
-  
-  // сохраняем undo
-  saveUndoState();
+window.addEventListener('orientationchange', function() {
+  setTimeout(() => {
+    renderGrid();
+    updateMobileControlsVisibility();
+  }, 100);
+});
 
-  let result;
-  if (direction === 'left') result = moveLeft(grid);
-  else if (direction === 'right') result = moveRight(grid);
-  else if (direction === 'up') result = moveUp(grid);
-  else if (direction === 'down') result = moveDown(grid);
-  else return false;
-
-  if (!result.moved) {
-    return false;
-  }
-  
-  // применяем новую сетку
-  grid = result.grid;
-  score += result.gained;
-
-  // Генерируем 1 или 2 новых плитки (случайно)
-  const spawnCount = (Math.random() < 0.25) ? 2 : 1;
-  spawnNewTiles(grid, spawnCount);
-
-  // Проверка окончания игры
-  if (!hasMoves(grid)) {
-    gameOver = true;
-    showGameOverModal();
-  }
-
-  saveGameState();
-  
-  // Передаем старое состояние для анимации
-  renderGrid(oldGrid);
-  
-  return true;
-}
-
-/* Undo */
-function undoMove() {
-  if (gameOver) return;
-  const raw = loadUndoState();
-  if (!raw) {
-    alert('Нет доступного хода для отмены');
-    return;
-  }
-  
-  grid = raw.grid;
-  score = raw.score;
-  gameOver = raw.gameOver;
-  saveGameState();
-  
-  renderGrid();
-}
-
-/* Модалки */
+// Обновляем при открытии/закрытии модальных окон
 function showGameOverModal() {
   modalMessage.textContent = `Игра окончена — ваш счёт: ${score}`;
   saveRow.classList.remove('hidden');
@@ -416,14 +356,14 @@ function showGameOverModal() {
   playerNameInput.style.display = '';
   saveScoreBtn.style.display = '';
   gameOverModal.classList.remove('hidden');
-  updateMobileControlsVisibility();
-}
-function hideGameOverModal() {
-  gameOverModal.classList.add('hidden');
-  updateMobileControlsVisibility();
+  updateMobileControlsVisibility(); // Обновляем видимость кнопок
 }
 
-/* Лидерборд UI */
+function hideGameOverModal() {
+  gameOverModal.classList.add('hidden');
+  updateMobileControlsVisibility(); // Обновляем видимость кнопок
+}
+
 function showLeaderboard() {
   const list = loadLeaders();
   while (leadersTableBody.firstChild) leadersTableBody.removeChild(leadersTableBody.firstChild);
@@ -437,12 +377,19 @@ function showLeaderboard() {
     leadersTableBody.appendChild(tr);
   });
   leaderboardModal.classList.remove('hidden');
-  updateMobileControlsVisibility();
+  updateMobileControlsVisibility(); // Обновляем видимость кнопок
 }
+
 function hideLeaderboard() {
   leaderboardModal.classList.add('hidden');
-  updateMobileControlsVisibility();
+  updateMobileControlsVisibility(); // Обновляем видимость кнопок
 }
+
+// Инициализация
+document.addEventListener('DOMContentLoaded', function() {
+  initGame();
+  updateMobileControlsVisibility();
+});
 
 /* ====== ИНИЦИАЛИЗАЦИЯ И ОБРАБОТЧИКИ ====== */
 function initGame() {
