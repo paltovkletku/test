@@ -1,86 +1,78 @@
-/*
-  ======== 2048 — Pink Pastel Theme ========
-  Нежный розовый UI + классическая палитра тайлов
-*/
-
-:root {
-  --bg: #f8e9ee;
-  --board-bg: #f3d7df;
-  --tile-empty: #f7edf1;
-  --text: #5a4a4a;
-  --radius: 14px;
-  --gap: 12px;
-  --tile-size: 90px;
-
-  /* UI */
-  --btn-bg: #f4cddb;
-  --btn-border: #eeb9ce;
-  --btn-hover: #f7dbe6;
+/* Общие стили */
+:root{
+  --bg: #fff6fb;
+  --panel: #ffffffcc;
+  --text: #40323a;
+  --accent: #800043;
+  --tile-gap: 12px;
+  --grid-size: 320px; /* desktop baseline */
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  font-family: "Inter", "Segoe UI", sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  justify-content: center;
-  padding: 24px;
+* { box-sizing: border-box; }
+html,body { height:100%; margin:0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color:var(--text); background: linear-gradient(180deg,#fff6fb, #fff0f8); }
+
+.header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; gap:16px; max-width:1100px; margin:0 auto; }
+.header h1 { margin:0; font-size:28px; letter-spacing:1px; }
+.controls-top { display:flex; align-items:center; gap:16px; }
+
+.score-box { background:var(--panel); padding:8px 12px; border-radius:8px; text-align:center; min-width:88px; }
+.score-box > div:first-child { font-size:12px; color:#7b606b;}
+.score-box > div:last-child { font-weight:700; font-size:18px; }
+
+.buttons { display:flex; gap:8px; }
+.btn { background:linear-gradient(180deg,#f9d5e4,#f2a7c9); border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:600; }
+.btn-secondary { background:transparent; border:1px solid rgba(0,0,0,0.06); }
+
+main { max-width:1100px; margin:16px auto; padding:0 16px; }
+.game-area { display:flex; gap:20px; align-items:flex-start; justify-content:center; flex-wrap:wrap; }
+
+/* Контейнер игры */
+.game-container { width:var(--grid-size); max-width:92vw; background: linear-gradient(180deg,#fff3f8,#fff7fb); padding:18px; border-radius:12px; position:relative; box-shadow: 0 8px 30px rgba(144,74,112,0.12); }
+.grid {
+  width:100%;
+  aspect-ratio:1;
+  background: rgba(255,255,255,0.06);
+  border-radius:8px;
+  display:grid;
+  grid-template-columns: repeat(4,1fr);
+  grid-template-rows: repeat(4,1fr);
+  gap: var(--tile-gap);
+  padding: var(--tile-gap);
+  position:relative;
+  overflow:hidden;
+  box-sizing:border-box;
 }
 
-.container {
-  width: 100%;
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+/* ячейки фона (для вида) */
+.grid .cell {
+  background: rgba(255,255,255,0.08);
+  border-radius:8px;
+  width:100%;
+  height:100%;
 }
 
-/* ===== Header ===== */
+/* слой плиток — абсолютно позиционируемый для анимации */
+.tiles-layer { position:absolute; inset:18px; pointer-events:none; }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* Плитка — абсолют */
+.tile {
+  position:absolute;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  border-radius:8px;
+  min-width:0;
+  min-height:0;
+  transform-origin: center;
+  transition: transform 150ms ease, opacity 120ms ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  will-change: transform, opacity;
+  padding:6px;
+  font-size:24px;
 }
 
-.header h1 {
-  margin: 0;
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.scoreboard {
-  display: flex;
-  gap: 10px;
-}
-
-.score-box {
-  background: var(--btn-bg);
-  border-radius: var(--radius);
-  padding: 8px 12px;
-  text-align: center;
-  min-width: 70px;
-}
-
-/* ===== Grid (cells + tiles) ===== */
-/* === PINK 2048 PALETTE === */
-
-.board {
-  padding: var(--gap);
-  background: #f2d3df;      /* нежно-розовое поле */
-  border-radius: var(--radius);
-  position: relative;
-}
-
-.cell {
-  background: #f7e5ee;      /* пустые клетки */
-  border-radius: var(--radius);
-}
-
-/* Тайлы — пастельный розовый градиент */
+/* Цвета плиток по заданию (пастельный розовый градиент) */
 .tile.v2    { background: #fce8f1; color: #8a6d7b; }
 .tile.v4    { background: #f9d5e4; color: #8a6d7b; }
 .tile.v8    { background: #f2a7c9; color: white; }
@@ -94,103 +86,44 @@ html, body {
 .tile.v1024 { background: #940c55; color: white; font-size: 18px; }
 .tile.v2048 { background: #800043; color: white; font-size: 18px; }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: var(--gap);
-  width: calc(var(--tile-size) * 4 + var(--gap) * 3);
-  height: calc(var(--tile-size) * 4 + var(--gap) * 3);
-}
-
-.cell {
-  background: var(--tile-empty);
-  border-radius: var(--radius);
-}
-
-/*  ===== Tiles ===== */
-
-.tile {
-  position: absolute;
-  width: var(--tile-size);
-  height: var(--tile-size);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius);
-  font-weight: 700;
-  font-size: 26px;
-  transition: transform 150ms ease, opacity 150ms ease;
-}
-
-/* === Animation === */
-.tile.new {
-  animation: pop 200ms ease-out;
-}
-
-.tile.merge {
-  animation: merge 200ms ease-out;
-}
-
+/* анимации */
+.tile.new { animation: pop 180ms ease; }
 @keyframes pop {
-  0% { transform: scale(0.4); }
+  0% { transform: scale(0.2); opacity:0; }
+  60% { transform: scale(1.08); opacity:1; }
+  100% { transform: scale(1); }
+}
+.tile.merge { animation: mergeAnim 180ms ease; }
+@keyframes mergeAnim {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.18); }
   100% { transform: scale(1); }
 }
 
-@keyframes merge {
-  0% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+/* Модалки */
+.modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.45); z-index:300; }
+.modal.hidden { display:none; }
+.modal-content { background:white; padding:18px; border-radius:10px; width:90%; max-width:520px; box-shadow:0 18px 60px rgba(0,0,0,0.25); }
+.save-row { display:flex; gap:8px; margin:8px 0; }
+.save-row input { flex:1; padding:8px 10px; border-radius:8px; border:1px solid #eee; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
+
+/* Лидерборд таблица */
+.leaders-table { width:100%; border-collapse:collapse; margin-top:8px; }
+.leaders-table th, .leaders-table td { padding:8px; text-align:left; border-bottom:1px solid #f0dbe6; font-size:14px; }
+
+/* Мелкие элементы */
+.info { max-width:360px; font-size:14px; color:#5f454f; }
+.footer { max-width:1100px; margin:18px auto; padding:0 16px; display:flex; gap:18px; justify-content:space-between; color:#6f5660; font-size:13px; }
+
+/* Responsive */
+@media (max-width:900px) {
+  :root { --grid-size: 420px; }
+  .game-area { flex-direction:column; align-items:center; }
 }
-
-/* ===== Buttons ===== */
-
-button {
-  padding: 10px 16px;
-  border: 1px solid var(--btn-border);
-  background: var(--btn-bg);
-  border-radius: var(--radius);
-  font-size: 15px;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-button:hover {
-  background: var(--btn-hover);
-}
-
-button:active {
-  transform: scale(0.97);
-}
-
-/* ===== Overlay (Game Over / Save Score) ===== */
-
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(240, 220, 230, 0.9);
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  border-radius: var(--radius);
-  gap: 12px;
-}
-
-.overlay input {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid var(--btn-border);
-}
-
-/* ===== Mobile Controls ===== */
-
-.mobile-controls {
-  display: none;
-  gap: 8px;
-  justify-content: center;
-}
-
-@media (max-width: 480px) {
-  :root { --tile-size: 72px; }
-  .mobile-controls { display: flex; }
+@media (max-width:420px) {
+  :root { --grid-size: 92vw; }
+  .header h1 { font-size:20px; }
+  .score-box > div:last-child { font-size:16px; }
+  .tile { font-size:18px; }
 }
