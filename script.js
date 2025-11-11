@@ -46,6 +46,21 @@ let undoState = null;
 /* Уникальные id для DOM-плиток */
 let tileIdCounter = 1;
 
+
+// Для отслеживания слияний
+function getMergedPositions(oldGrid, newGrid) {
+  const merged = [];
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      // Если в новой сетке значение больше чем в старой и это не 0
+      if (newGrid[r][c] > oldGrid[r][c] && oldGrid[r][c] !== 0) {
+        merged.push({ r, c });
+      }
+    }
+  }
+  return merged;
+}
+
 /* Инициализация интерфейса: создаём визуальные ячейки (фон) динамически */
 function createGridUI() {
   // Очистка
@@ -260,53 +275,82 @@ function spawnNewTiles(board, count=1) {
 }
 
 /* ====== Рендеринг плиток (DOM) ====== */
-function renderGrid(oldPositions = null, mergedInfo = null) {
+function renderGrid(oldGrid = null, mergedPositions = null) {
   // Обновляем счет
   scoreEl.textContent = String(score);
 
-  // Запомним старые прямоугольники
-  const oldRects = new Map();
-  Array.from(tilesLayer.children).forEach(el=>{
-    const key = el.dataset.key;
-    oldRects.set(key, el.getBoundingClientRect());
+  // Сохраняем старые позиции плиток для анимации
+  const oldTilePositions = new Map();
+  Array.from(tilesLayer.children).forEach(el => {
+    const row = parseInt(el.dataset.row);
+    const col = parseInt(el.dataset.col);
+    const key = `${row}-${col}`;
+    oldTilePositions.set(key, {
+      element: el,
+      rect: el.getBoundingClientRect()
+    });
   });
 
-  // Сохраняем старые элементы (для расчёта анимации)
-  const oldEls = Array.from(tilesLayer.children);
   // Очистим слой
   while (tilesLayer.firstChild) tilesLayer.removeChild(tilesLayer.firstChild);
 
   // вычислим размеры клетки в пикселях
   const gridRect = gridEl.getBoundingClientRect();
   const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tile-gap')) || 12;
-  const cellSize = (gridRect.width - gap * (SIZE+1)) / SIZE;
+  const cellSize = (gridRect.width - gap * (SIZE + 1)) / SIZE;
 
   // создаём плитки по текущему grid
-  for (let r=0;r<SIZE;r++){
-    for (let c=0;c<SIZE;c++){
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
       const val = grid[r][c];
       if (val === 0) continue;
+      
       const tile = document.createElement('div');
       tile.classList.add('tile');
       tile.classList.add('v' + val);
       tile.textContent = String(val);
+      
       // позиционируем абсолютно
       tile.style.width = `${cellSize}px`;
       tile.style.height = `${cellSize}px`;
-      tile.style.left = `${gap + c*(cellSize + gap)}px`;
-      tile.style.top  = `${gap + r*(cellSize + gap)}px`;
+      tile.style.left = `${gap + c * (cellSize + gap)}px`;
+      tile.style.top = `${gap + r * (cellSize + gap)}px`;
       tile.dataset.row = r;
       tile.dataset.col = c;
       tile.dataset.val = val;
-      // уникальный ключ (включаем id counter, чтобы каждое создание было уникальным)
+      
       const uid = tileIdCounter++;
       tile.dataset.key = `${r}-${c}-${val}-${uid}`;
 
-      // Если недавно созданная плитка (новая) — добавим класс для pop-анимации
-      if (oldPositions) {
-        const wasEmpty = (oldPositions[r][c] === 0);
-        if (wasEmpty) tile.classList.add('new');
-      } else {
+      // Анимация появления новых плиток
+      const oldKey = `${r}-${c}`;
+      if (oldGrid && oldGrid[r][c] === 0) {
+        tile.classList.add('new');
+      }
+
+      // Анимация движения - находим откуда двигалась плитка
+      if (oldTilePositions.has(oldKey)) {
+        const oldTile = oldTilePositions.get(oldKey);
+        const oldRect = oldTile.rect;
+        const newRect = {
+          left: gap + c * (cellSize + gap),
+          top: gap + r * (cellSize + gap)
+        };
+        
+        const dx = oldRect.left - (gridRect.left + newRect.left);
+        const dy = oldRect.top - (gridRect.top + newRect.top);
+        
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+          tile.style.transform = `translate(${dx}px, ${dy}px)`;
+          tile.style.transition = 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)';
+          
+          // Запускаем анимацию после добавления в DOM
+          requestAnimationFrame(() => {
+            tile.style.transform = '';
+          });
+        }
+      } else if (!oldGrid || oldGrid[r][c] === 0) {
+        // Новая плитка
         tile.classList.add('new');
       }
 
@@ -314,48 +358,13 @@ function renderGrid(oldPositions = null, mergedInfo = null) {
     }
   }
 
-  // АНИМАЦИЯ ПЕРЕМЕЩЕНИЯ:
-  const newRects = new Map();
-  Array.from(tilesLayer.children).forEach(el=>{
-    newRects.set(el.dataset.key, el.getBoundingClientRect());
-  });
-
-  const oldRectsArr = Array.from(oldRects.entries());
-  Array.from(tilesLayer.children).forEach(newEl=>{
-    const val = Number(newEl.dataset.val);
-    let bestIdx = -1;
-    let bestDist = Infinity;
-    for (let i=0;i<oldRectsArr.length;i++){
-      const [key, rect] = oldRectsArr[i];
-      const parts = key.split('-');
-      const oldVal = Number(parts[2]);
-      if (oldVal !== val) continue;
-      const newRect = newEl.getBoundingClientRect();
-      const dx = newRect.left - rect.left;
-      const dy = newRect.top - rect.top;
-      const dist = Math.hypot(dx,dy);
-      if (dist < bestDist) { bestDist = dist; bestIdx = i; }
-    }
-    if (bestIdx >= 0) {
-      const [oldKey, oldRect] = oldRectsArr[bestIdx];
-      const newRect = newEl.getBoundingClientRect();
-      const dx = oldRect.left - newRect.left;
-      const dy = oldRect.top - newRect.top;
-      newEl.style.transform = `translate(${dx}px, ${dy}px)`;
-      newEl.getBoundingClientRect();
-      newEl.style.transition = 'transform 140ms ease';
-      newEl.style.transform = '';
-      oldRectsArr.splice(bestIdx,1);
-    }
-  });
-
-  // Merge animation
-  if (mergedInfo && mergedInfo.length) {
-    mergedInfo.forEach(pos=>{
-      Array.from(tilesLayer.children).forEach(el=>{
+  // Анимация слияния
+  if (mergedPositions && mergedPositions.length) {
+    mergedPositions.forEach(pos => {
+      Array.from(tilesLayer.children).forEach(el => {
         if (Number(el.dataset.row) === pos.r && Number(el.dataset.col) === pos.c) {
           el.classList.add('merge');
-          setTimeout(()=> el.classList.remove('merge'), 260);
+          setTimeout(() => el.classList.remove('merge'), 400);
         }
       });
     });
@@ -378,8 +387,9 @@ function updateMobileControlsVisibility() {
   }
 }
 
-/* ====== Игровые действия (API для UI) ====== */
 function startNewGame() {
+  const oldGrid = cloneGrid(grid); // Сохраняем для возможной анимации
+  
   grid = createEmptyGrid();
   score = 0;
   gameOver = false;
@@ -388,13 +398,19 @@ function startNewGame() {
   spawnNewTiles(grid, initial);
   saveUndoState(); // сохраняем начальное для отмены
   saveGameState();
-  renderGrid();
+  
+  // Передаем старое состояние для анимации
+  renderGrid(oldGrid);
   hideGameOverModal();
   updateMobileControlsVisibility();
 }
 
 function performMove(direction) {
   if (gameOver) return false;
+  
+  // Сохраняем текущее состояние для анимации
+  const oldGrid = cloneGrid(grid);
+  
   // сохраняем undo
   saveUndoState();
 
@@ -408,6 +424,7 @@ function performMove(direction) {
   if (!result.moved) {
     return false;
   }
+  
   // применяем новую сетку
   grid = result.grid;
   score += result.gained;
@@ -423,7 +440,9 @@ function performMove(direction) {
   }
 
   saveGameState();
-  renderGrid();
+  
+  // Передаем старое состояние для анимации
+  renderGrid(oldGrid);
   return true;
 }
 
@@ -435,11 +454,17 @@ function undoMove() {
     alert('Нет доступного хода для отмены');
     return;
   }
+  
+  // Сохраняем текущее состояние для возможной анимации
+  const oldGrid = cloneGrid(grid);
+  
   grid = raw.grid;
   score = raw.score;
   gameOver = raw.gameOver;
   saveGameState();
-  renderGrid();
+  
+  // Передаем старое состояние для анимации
+  renderGrid(oldGrid);
 }
 
 /* Модалки */
