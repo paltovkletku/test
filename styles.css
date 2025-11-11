@@ -5,7 +5,7 @@
   --text: #5a3a4a;
   --accent: #800043;
   --tile-gap: 12px;
-  --grid-size: 320px;
+  --grid-size: 400px; /* Увеличили для десктопа */
 }
 
 * { box-sizing: border-box; }
@@ -115,7 +115,7 @@ main {
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
-/* Контейнер игры */
+/* Контейнер игры - УВЕЛИЧЕН для десктопа */
 .game-container { 
   width:var(--grid-size); 
   background: linear-gradient(180deg,#fff3f8,#fff7fb); 
@@ -154,7 +154,7 @@ main {
   pointer-events:none; 
 }
 
-/* Плитка */
+/* Плитка - УВЕЛИЧЕН размер шрифта для десктопа */
 .tile {
   position:absolute;
   display:flex;
@@ -164,24 +164,24 @@ main {
   border-radius:8px;
   min-width:0;
   min-height:0;
-  padding:6px;
-  font-size:24px;
+  padding:8px; /* Увеличили отступы */
+  font-size:28px; /* Увеличили шрифт */
   z-index: 2;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* Цвета плиток */
+/* Цвета плиток с увеличенными шрифтами */
 .tile.v2    { background: linear-gradient(135deg, #fce8f1, #f8d4e8); color: #8a6d7b; }
 .tile.v4    { background: linear-gradient(135deg, #f9d5e4, #f5c1dc); color: #8a6d7b; }
 .tile.v8    { background: linear-gradient(135deg, #f2a7c9, #ee93bc); color: white; }
 .tile.v16   { background: linear-gradient(135deg, #ee7dae, #ea69a2); color: white; }
 .tile.v32   { background: linear-gradient(135deg, #e05795, #dc4389); color: white; }
 .tile.v64   { background: linear-gradient(135deg, #d23f84, #ce2b7a); color: white; }
-.tile.v128  { background: linear-gradient(135deg, #c42c78, #c0186e); color: white; font-size: 22px; box-shadow: 0 5px 15px rgba(196, 44, 120, 0.3); }
-.tile.v256  { background: linear-gradient(135deg, #b71f6b, #b30b61); color: white; font-size: 22px; box-shadow: 0 5px 15px rgba(183, 31, 107, 0.3); }
-.tile.v512  { background: linear-gradient(135deg, #a71461, #a30057); color: white; font-size: 20px; box-shadow: 0 6px 18px rgba(167, 20, 97, 0.4); }
-.tile.v1024 { background: linear-gradient(135deg, #940c55, #90004b); color: white; font-size: 18px; box-shadow: 0 6px 18px rgba(148, 12, 85, 0.4); }
-.tile.v2048 { background: linear-gradient(135deg, #800043, #7c0039); color: white; font-size: 18px; box-shadow: 0 7px 20px rgba(128, 0, 67, 0.5); }
+.tile.v128  { background: linear-gradient(135deg, #c42c78, #c0186e); color: white; font-size: 26px; box-shadow: 0 5px 15px rgba(196, 44, 120, 0.3); }
+.tile.v256  { background: linear-gradient(135deg, #b71f6b, #b30b61); color: white; font-size: 26px; box-shadow: 0 5px 15px rgba(183, 31, 107, 0.3); }
+.tile.v512  { background: linear-gradient(135deg, #a71461, #a30057); color: white; font-size: 24px; box-shadow: 0 6px 18px rgba(167, 20, 97, 0.4); }
+.tile.v1024 { background: linear-gradient(135deg, #940c55, #90004b); color: white; font-size: 22px; box-shadow: 0 6px 18px rgba(148, 12, 85, 0.4); }
+.tile.v2048 { background: linear-gradient(135deg, #800043, #7c0039); color: white; font-size: 22px; box-shadow: 0 7px 20px rgba(128, 0, 67, 0.5); }
 
 /* Анимации */
 .tile.new { 
@@ -333,7 +333,7 @@ main {
 
 /* Responsive */
 @media (max-width: 900px) {
-  :root { --grid-size: 380px; }
+  :root { --grid-size: 380px; } /* Немного меньше для планшетов */
   .game-area { 
     flex-direction: column; 
     align-items: center; 
@@ -346,6 +346,16 @@ main {
   .header h1 {
     font-size: 28px;
   }
+  /* Для планшетов уменьшаем шрифт плиток */
+  .tile {
+    font-size: 24px;
+    padding: 6px;
+  }
+  .tile.v128,
+  .tile.v256 { font-size: 22px; }
+  .tile.v512 { font-size: 20px; }
+  .tile.v1024,
+  .tile.v2048 { font-size: 18px; }
 }
 
 @media (max-width: 767px) {
@@ -382,10 +392,20 @@ main {
 }
 
 @media (max-width: 480px) {
-  :root { --grid-size: 92vw; }
+  :root { --grid-size: 92vw; } /* На мобильных занимает почти всю ширину */
   .header h1 { font-size: 24px; }
   .score-box > div:last-child { font-size: 18px; }
-  .tile { font-size: 18px; }
+  
+  /* Для мобильных уменьшаем шрифт плиток */
+  .tile { 
+    font-size: 20px; 
+    padding: 4px;
+  }
+  .tile.v128,
+  .tile.v256 { font-size: 18px; }
+  .tile.v512 { font-size: 16px; }
+  .tile.v1024,
+  .tile.v2048 { font-size: 14px; }
   
   .control-btn {
     width: 50px;
@@ -410,4 +430,20 @@ main {
     min-width: 90px;
     font-size: 14px;
   }
+}
+
+/* Дополнительные медиа-запросы для очень больших экранов */
+@media (min-width: 1200px) {
+  :root { 
+    --grid-size: 450px; /* Еще больше для больших экранов */
+  }
+  .tile {
+    font-size: 32px; /* Еще больше шрифт */
+    padding: 10px;
+  }
+  .tile.v128,
+  .tile.v256 { font-size: 30px; }
+  .tile.v512 { font-size: 28px; }
+  .tile.v1024,
+  .tile.v2048 { font-size: 26px; }
 }
