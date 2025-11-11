@@ -31,11 +31,23 @@
       </div>
 
       <aside class="info">
-        <p>Управление: стрелки (ПК) — свайпы (моб. устройства)</p>
+        <p>Управление: стрелки (ПК) — кнопки (моб. устройства)</p>
         <p>При завершении игры можно сохранить рекорд с именем.</p>
       </aside>
     </section>
   </main>
+
+  <!-- Блок кнопок управления для мобильных устройств -->
+  <div id="mobileControls" class="mobile-controls hidden">
+    <div class="controls-row">
+      <button id="upBtn" class="control-btn" data-direction="up">↑</button>
+    </div>
+    <div class="controls-row">
+      <button id="leftBtn" class="control-btn" data-direction="left">←</button>
+      <button id="downBtn" class="control-btn" data-direction="down">↓</button>
+      <button id="rightBtn" class="control-btn" data-direction="right">→</button>
+    </div>
+  </div>
 
   <!-- Модалка Game Over / Save -->
   <div id="gameOverModal" class="modal hidden" role="dialog" aria-modal="true">
