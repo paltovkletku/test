@@ -15,6 +15,13 @@ const newGameBtn = document.getElementById('newGameBtn');
 const undoBtn = document.getElementById('undoBtn');
 const leaderBtn = document.getElementById('leaderBtn');
 
+/* Мобильные элементы управления */
+const mobileControls = document.getElementById('mobileControls');
+const upBtn = document.getElementById('upBtn');
+const leftBtn = document.getElementById('leftBtn');
+const downBtn = document.getElementById('downBtn');
+const rightBtn = document.getElementById('rightBtn');
+
 const gameOverModal = document.getElementById('gameOverModal');
 const modalMessage = document.getElementById('modalMessage');
 const saveRow = document.getElementById('saveRow');
@@ -190,12 +197,6 @@ function moveRight(board) {
 function moveUp(board) {
   // rotate anticlockwise, moveLeft, rotate clockwise
   let rot = cloneGrid(board);
-  // rotate anticlockwise 3 times == rotate clockwise 1 time reversed
-  // simpler: transpose and reverse columns...
-  // Implement by rotating clockwise 3 times
-  for (let i=0;i<1;i++) rot = rotateGrid(rot); // one clockwise
-  // If we want moveUp, rotate anticlockwise: do 3 clockwise. But easier: rotate clockwise 3 times for anticlockwise
-  // Let's implement correct: for moveUp rotate clockwise 3 times -> then moveLeft -> rotate clockwise 1 time back
   rot = rotateGrid(rotateGrid(rotateGrid(board))); // 3 clockwise == anticlockwise
   const res = moveLeft(rot);
   // rotate back (1 clockwise)
@@ -258,11 +259,7 @@ function spawnNewTiles(board, count=1) {
   return board;
 }
 
-/* ====== Рендеринг плиток (DOM) ======
-   Подход: при каждом обновлении мы пересоздаём набор DOM-плиток,
-   но перед этим сохраняем boundingClientRect текущих плиток для плавной анимации.
-   Каждой плитке даём data-key (row-col-value-uid) — уникальный при создании.
-*/
+/* ====== Рендеринг плиток (DOM) ====== */
 function renderGrid(oldPositions = null, mergedInfo = null) {
   // Обновляем счет
   scoreEl.textContent = String(score);
@@ -306,7 +303,6 @@ function renderGrid(oldPositions = null, mergedInfo = null) {
       tile.dataset.key = `${r}-${c}-${val}-${uid}`;
 
       // Если недавно созданная плитка (новая) — добавим класс для pop-анимации
-      // Отличить новую плитку можем если oldPositions passed and oldPositions at same (r,c) was 0
       if (oldPositions) {
         const wasEmpty = (oldPositions[r][c] === 0);
         if (wasEmpty) tile.classList.add('new');
@@ -319,33 +315,19 @@ function renderGrid(oldPositions = null, mergedInfo = null) {
   }
 
   // АНИМАЦИЯ ПЕРЕМЕЩЕНИЯ:
-  // Для плавного перемещения мы:
-  // - вычисляем newRects после вставки
-  // - для каждой tile с ключем (ключ старый для старых элементов) находим старый rect и new rect
-  // - ставим transform: translate(delta) на элемент и затем сбрасываем (анимируется)
   const newRects = new Map();
   Array.from(tilesLayer.children).forEach(el=>{
     newRects.set(el.dataset.key, el.getBoundingClientRect());
   });
 
-  // Поскольку ключи новые (uid меняется), нам не сматчить старые и новые напрямую.
-  // Поэтому мы match'им плитки по значению и по position changes heuristically:
-  // Для анимации перемещения сделаем простой эффект: плавное появление и лёгкий translate при смене позиции.
-  // Для более точной анимации можно хранить прошлую "карта значений" и сопоставлять, но для
-  // стабильного и чистого результата анимация scale+fade достаточна (merge/appear).
-
-  // Если хотим анимацию для перемещений: можем применить небольшой визуальный сдвиг от старой позиции
-  // Попытка простого сопоставления: для каждого new tile найдем ближайшее по значению и координате старый rect
   const oldRectsArr = Array.from(oldRects.entries());
   Array.from(tilesLayer.children).forEach(newEl=>{
-    // найдем возможный старый элемент с таким же value, ближайший по расстоянию
     const val = Number(newEl.dataset.val);
     let bestIdx = -1;
     let bestDist = Infinity;
     for (let i=0;i<oldRectsArr.length;i++){
       const [key, rect] = oldRectsArr[i];
-      // извлечь value из key, если возможно
-      const parts = key.split('-'); // row-col-val-uid
+      const parts = key.split('-');
       const oldVal = Number(parts[2]);
       if (oldVal !== val) continue;
       const newRect = newEl.getBoundingClientRect();
@@ -359,32 +341,40 @@ function renderGrid(oldPositions = null, mergedInfo = null) {
       const newRect = newEl.getBoundingClientRect();
       const dx = oldRect.left - newRect.left;
       const dy = oldRect.top - newRect.top;
-      // применим обратный сдвиг, потом уберём его, чтобы получить анимацию
       newEl.style.transform = `translate(${dx}px, ${dy}px)`;
-      // force reflow
       newEl.getBoundingClientRect();
       newEl.style.transition = 'transform 140ms ease';
       newEl.style.transform = '';
-      // удаляем использованный oldRect чтобы не повторно использовать
       oldRectsArr.splice(bestIdx,1);
-    } else {
-      // новый элемент — уже имеет .new анимацию
     }
   });
 
-  // Merge animation: если mergedInfo — массив позиций которые были merge результат, применим класс .merge
+  // Merge animation
   if (mergedInfo && mergedInfo.length) {
-    // mergedInfo содержит список позиций (r,c) новых значений получившихся в результате слияния
     mergedInfo.forEach(pos=>{
-      // найти плитку в tilesLayer с этими координатами и пометить
       Array.from(tilesLayer.children).forEach(el=>{
         if (Number(el.dataset.row) === pos.r && Number(el.dataset.col) === pos.c) {
           el.classList.add('merge');
-          // удалить класс через 250ms
           setTimeout(()=> el.classList.remove('merge'), 260);
         }
       });
     });
+  }
+}
+
+/* ====== Управление видимостью мобильных кнопок ====== */
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+         window.innerWidth <= 768;
+}
+
+function updateMobileControlsVisibility() {
+  if (isMobileDevice() && 
+      gameOverModal.classList.contains('hidden') && 
+      leaderboardModal.classList.contains('hidden')) {
+    mobileControls.classList.remove('hidden');
+  } else {
+    mobileControls.classList.add('hidden');
   }
 }
 
@@ -400,10 +390,11 @@ function startNewGame() {
   saveGameState();
   renderGrid();
   hideGameOverModal();
+  updateMobileControlsVisibility();
 }
 
 function performMove(direction) {
-  if (gameOver) return;
+  if (gameOver) return false;
   // сохраняем undo
   saveUndoState();
 
@@ -412,18 +403,17 @@ function performMove(direction) {
   else if (direction === 'right') result = moveRight(grid);
   else if (direction === 'up') result = moveUp(grid);
   else if (direction === 'down') result = moveDown(grid);
-  else return;
+  else return false;
 
   if (!result.moved) {
-    // нет изменений — не генерируем новые плитки
-    return;
+    return false;
   }
   // применяем новую сетку
   grid = result.grid;
   score += result.gained;
 
   // Генерируем 1 или 2 новых плитки (случайно)
-  const spawnCount = (Math.random() < 0.25) ? 2 : 1; // примерно 25% шанс на 2
+  const spawnCount = (Math.random() < 0.25) ? 2 : 1;
   spawnNewTiles(grid, spawnCount);
 
   // Проверка окончания игры
@@ -434,11 +424,12 @@ function performMove(direction) {
 
   saveGameState();
   renderGrid();
+  return true;
 }
 
 /* Undo */
 function undoMove() {
-  if (gameOver) return; // нельзя отменять ход после окончания игры
+  if (gameOver) return;
   const raw = loadUndoState();
   if (!raw) {
     alert('Нет доступного хода для отмены');
@@ -459,15 +450,16 @@ function showGameOverModal() {
   playerNameInput.style.display = '';
   saveScoreBtn.style.display = '';
   gameOverModal.classList.remove('hidden');
+  updateMobileControlsVisibility();
 }
 function hideGameOverModal() {
   gameOverModal.classList.add('hidden');
+  updateMobileControlsVisibility();
 }
 
 /* Лидерборд UI */
 function showLeaderboard() {
   const list = loadLeaders();
-  // очистим тело
   while (leadersTableBody.firstChild) leadersTableBody.removeChild(leadersTableBody.firstChild);
   list.forEach((entry, idx) => {
     const tr = document.createElement('tr');
@@ -479,16 +471,34 @@ function showLeaderboard() {
     leadersTableBody.appendChild(tr);
   });
   leaderboardModal.classList.remove('hidden');
+  updateMobileControlsVisibility();
 }
 function hideLeaderboard() {
   leaderboardModal.classList.add('hidden');
+  updateMobileControlsVisibility();
+}
+
+/* ====== ИНИЦИАЛИЗАЦИЯ И ОБРАБОТЧИКИ ====== */
+function initGame() {
+  const ok = loadGameState();
+  if (!ok) {
+    startNewGame();
+  } else {
+    if (!grid || grid.length !== SIZE) {
+      startNewGame();
+      return;
+    }
+    renderGrid();
+  }
+  
+  undoState = loadUndoState();
+  updateMobileControlsVisibility();
 }
 
 /* Save score from modal */
 saveScoreBtn.addEventListener('click', ()=>{
   const name = playerNameInput.value.trim() || '—';
   addLeader(name, score);
-  // обновить UI
   playerNameInput.style.display = 'none';
   saveScoreBtn.style.display = 'none';
   modalMessage.textContent = 'Ваш рекорд сохранён';
@@ -516,9 +526,15 @@ clearLeadersBtn.addEventListener('click', ()=>{
 newGameBtn.addEventListener('click', ()=> startNewGame());
 undoBtn.addEventListener('click', ()=> undoMove());
 
+/* Мобильные кнопки управления */
+upBtn.addEventListener('click', () => performMove('up'));
+leftBtn.addEventListener('click', () => performMove('left'));
+downBtn.addEventListener('click', () => performMove('down'));
+rightBtn.addEventListener('click', () => performMove('right'));
+
 /* Слушаем клавиатуру (desktop) */
 window.addEventListener('keydown', (e)=>{
-  if (leaderboardModal.classList.contains('hidden') === false) return; // если таблица видна — не мешаем
+  if (leaderboardModal.classList.contains('hidden') === false) return;
   if (gameOver && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return;
   if (e.key === 'ArrowLeft') { performMove('left'); e.preventDefault(); }
   else if (e.key === 'ArrowRight') { performMove('right'); e.preventDefault(); }
@@ -526,58 +542,14 @@ window.addEventListener('keydown', (e)=>{
   else if (e.key === 'ArrowDown') { performMove('down'); e.preventDefault(); }
 });
 
-/* ====== Свайпы (mobile) ====== */
-let touchStartX=0, touchStartY=0, touchStartTime=0;
-const minDist = 30; // минимум пикселей для признания свайпа
-gameContainer.addEventListener('touchstart', (e)=>{
-  if (!e.touches || e.touches.length === 0) return;
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-  touchStartTime = Date.now();
-}, {passive:true});
-gameContainer.addEventListener('touchend', (e)=>{
-  if (!e.changedTouches || e.changedTouches.length === 0) return;
-  const ex = e.changedTouches[0].clientX;
-  const ey = e.changedTouches[0].clientY;
-  const dx = ex - touchStartX;
-  const dy = ey - touchStartY;
-  if (Math.max(Math.abs(dx), Math.abs(dy)) < minDist) return;
-  if (Math.abs(dx) > Math.abs(dy)) {
-    if (dx > 0) performMove('right'); else performMove('left');
-  } else {
-    if (dy > 0) performMove('down'); else performMove('up');
-  }
-}, {passive:true});
+/* Обновляем видимость кнопок при изменении размера окна */
+window.addEventListener('resize', updateMobileControlsVisibility);
 
-/* ====== Загрузка состояния при старте ====== */
-function initFromStorageOrNew() {
-  const ok = loadGameState();
-  if (!ok) {
-    // если сохранения нет — создаём новую игру
-    startNewGame();
-  } else {
-    // если есть сохранённая игра — восстанавливаем поле
-    if (!grid || grid.length !== SIZE) {
-      startNewGame();
-      return;
-    }
-    renderGrid(); // просто отрисовываем т
-
-
-/* Когда закрывается leaderboard — обновим UI */
-leaderboardModal.addEventListener('transitionend', ()=>{ /* noop */ });
-
-/* Сохранение лидеров и состояния перед выгрузкой */
+/* Сохранение состояния перед выгрузкой */
 window.addEventListener('beforeunload', ()=>{
   saveGameState();
   try { localStorage.setItem(UNDO_KEY, JSON.stringify(undoState)); } catch (e) {}
 });
 
-/* Дополнительно — наблюдаем за переключением видимости модалок, чтобы скрывать элементы управления (если бы они были) */
-const observer = new MutationObserver(()=>{
-  // Если таблица лидеров открыта — можно скрыть контролы (виртуальные) — в нашей реализации их нет,
-  // но поддерживаем правило: когда leaderboard открыт, отключаем обработку свайпов/клавиатуры by flag
-});
-observer.observe(leaderboardModal, { attributes:true, attributeFilter:['class'] });
-
-/* Конец файла */
+/* Инициализация игры при загрузке страницы */
+document.addEventListener('DOMContentLoaded', initGame);
