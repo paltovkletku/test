@@ -40,7 +40,52 @@ let gameOver = false;
 let undoState = null;
 let tileIdCounter = 1;
 
-/* ====== ИНИЦИАЛИЗАЦИЯ ИГРЫ ======= */
+/* ======= УПРАВЛЕНИЕ УСТРОЙСТВАМИ ======= */
+
+// Определяем один раз при загрузке
+let isMobileDevice = false;
+
+function detectDeviceTypeOnce() {
+  const userAgent = navigator.userAgent.toLowerCase();
+  
+  // Проверяем мобильные устройства по User Agent
+  const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+  
+  // Проверяем тач-устройства
+  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  
+  // Проверяем тип указателя (надежнее чем ширина окна)
+  const hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  
+  // Если это мобильное устройство по UA И есть тач-события
+  // ИЛИ есть грубый указатель (характерно для тач-устройств)
+  isMobileDevice = (isMobileUA && hasTouch) || hasCoarsePointer;
+  
+  console.log('Device detection (once):', {
+    isMobileDevice,
+    userAgent: navigator.userAgent,
+    hasTouch,
+    hasCoarsePointer,
+    isMobileUA
+  });
+  
+  return isMobileDevice;
+}
+
+function updateMobileControlsVisibility() {
+  const modalsOpen = !gameOverModal.classList.contains('hidden') || 
+                     !leaderboardModal.classList.contains('hidden');
+  
+  if (isMobileDevice && !modalsOpen) {
+    mobileControls.classList.add('visible');
+    mobileControls.classList.remove('hidden');
+  } else {
+    mobileControls.classList.remove('visible');
+    mobileControls.classList.add('hidden');
+  }
+}
+
+/* ======= ИНИЦИАЛИЗАЦИЯ ИГРЫ ======= */
 
 function createGridUI() {
   while (gridEl.firstChild) gridEl.removeChild(gridEl.firstChild);
@@ -327,31 +372,6 @@ function renderGrid(oldGrid = null) {
   }
 }
 
-/* ======= УПРАВЛЕНИЕ УСТРОЙСТВАМИ ======= */
-
-function isMobileDevice() {
-  // Простая и надежная проверка
-  return (
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-    (navigator.maxTouchPoints && navigator.maxTouchPoints > 2) ||
-    (window.innerWidth <= 768)
-  );
-}
-
-function updateMobileControlsVisibility() {
-  const isMobile = isMobileDevice();
-  const modalsOpen = !gameOverModal.classList.contains('hidden') || 
-                     !leaderboardModal.classList.contains('hidden');
-  
-  if (isMobile && !modalsOpen) {
-    mobileControls.classList.add('visible');
-    mobileControls.classList.remove('hidden');
-  } else {
-    mobileControls.classList.remove('visible');
-    mobileControls.classList.add('hidden');
-  }
-}
-
 /* ======= ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ======= */
 
 function startNewGame() {
@@ -460,6 +480,9 @@ function hideLeaderboard() {
 /* ======= ИНИЦИАЛИЗАЦИЯ И ОБРАБОТЧИКИ ======= */
 
 function initGame() {
+  // Определяем тип устройства ОДИН РАЗ
+  detectDeviceTypeOnce();
+  
   const ok = loadGameState();
   if (!ok) {
     startNewGame();
@@ -521,16 +544,14 @@ window.addEventListener('keydown', (e)=>{
   else if (e.key === 'ArrowDown') { performMove('down'); e.preventDefault(); }
 });
 
-/* Изменение размера окна */
+/* Изменение размера окна - только для рендеринга */
 window.addEventListener('resize', function() {
   renderGrid();
-  setTimeout(updateMobileControlsVisibility, 100);
 });
 
 window.addEventListener('orientationchange', function() {
   setTimeout(() => {
     renderGrid();
-    updateMobileControlsVisibility();
   }, 300);
 });
 
@@ -543,6 +564,4 @@ window.addEventListener('beforeunload', ()=>{
 /* Запуск игры */
 document.addEventListener('DOMContentLoaded', function() {
   initGame();
-  // Дополнительная проверка через секунду на всякий случай
-  setTimeout(updateMobileControlsVisibility, 1000);
 });
