@@ -553,19 +553,16 @@ gameContainer.addEventListener('touchend', (e)=>{
 function initFromStorageOrNew() {
   const ok = loadGameState();
   if (!ok) {
+    // если сохранения нет — создаём новую игру
     startNewGame();
   } else {
-    // ensure grid dimensions ok
+    // если есть сохранённая игра — восстанавливаем поле
     if (!grid || grid.length !== SIZE) {
       startNewGame();
       return;
     }
-    renderGrid(grid); // передаём oldPositions чтобы пометить новые
-    // если gameOver true — показать модалку
-    if (gameOver) showGameOverModal();
-  }
-}
-initFromStorageOrNew();
+    renderGrid(); // просто отрисовываем т
+
 
 /* Когда закрывается leaderboard — обновим UI */
 leaderboardModal.addEventListener('transitionend', ()=>{ /* noop */ });
