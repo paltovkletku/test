@@ -1,207 +1,586 @@
-// ===== 2048 GAME LOGIC =====
-const boardSize = 4;
-let board = [];
-let history = [];
+/* script.js — все динамически создаётся через чистый JS (без innerHTML/outerHTML) */
+
+/* ======= Конфигурации ======= */
+const SIZE = 4;
+const STORAGE_KEY = 'game2048_state_v1';
+const UNDO_KEY = 'game2048_undo_v1';
+const LEADERS_KEY = 'game2048_leaders_v1';
+
+/* DOM элементы */
+const gameContainer = document.getElementById('gameContainer');
+const gridEl = gameContainer.querySelector('.grid');
+const tilesLayer = gameContainer.querySelector('.tiles-layer');
+const scoreEl = document.getElementById('score');
+const newGameBtn = document.getElementById('newGameBtn');
+const undoBtn = document.getElementById('undoBtn');
+const leaderBtn = document.getElementById('leaderBtn');
+
+const gameOverModal = document.getElementById('gameOverModal');
+const modalMessage = document.getElementById('modalMessage');
+const saveRow = document.getElementById('saveRow');
+const playerNameInput = document.getElementById('playerName');
+const saveScoreBtn = document.getElementById('saveScoreBtn');
+const modalRestartBtn = document.getElementById('modalRestartBtn');
+const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+const leaderboardModal = document.getElementById('leaderboardModal');
+const leadersTableBody = document.querySelector('#leadersTable tbody');
+const closeLeadersBtn = document.getElementById('closeLeadersBtn');
+const clearLeadersBtn = document.getElementById('clearLeadersBtn');
+
+/* Состояние игры */
+let grid = createEmptyGrid();
 let score = 0;
-let best = Number(localStorage.getItem("bestScore") || 0);
+let gameOver = false;
 
-const tileSize = 90; // px, совпадает с CSS
-const gap = 12;      // px, совпадает с CSS
+/* Для undo: сохраняем прошлое состояние (грид, score) */
+let undoState = null;
 
-// Elements
-const boardEl = document.getElementById("board");
-const grid = document.getElementById("grid");
-const scoreEl = document.getElementById("score");
-const bestEl = document.getElementById("best");
-const overlay = document.getElementById("overlay");
-const inputName = document.getElementById("player");
-const saveScoreBtn = document.getElementById("save");
-const restartBtn = document.getElementById("restart");
-const undoBtn = document.getElementById("undo");
-const lbBtn = document.getElementById("openLB");
-const closeLB = document.getElementById("closeLB");
-const lbModal = document.getElementById("leaderboard");
-const lbList = document.getElementById("lbList");
+/* Уникальные id для DOM-плиток */
+let tileIdCounter = 1;
 
-// ===== Grid =====
-function createGrid() {
-  for (let i = 0; i < boardSize * boardSize; i++) {
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    grid.appendChild(cell);
+/* Инициализация интерфейса: создаём визуальные ячейки (фон) динамически */
+function createGridUI() {
+  // Очистка
+  while (gridEl.firstChild) gridEl.removeChild(gridEl.firstChild);
+
+  for (let r=0;r<SIZE;r++){
+    for (let c=0;c<SIZE;c++){
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      gridEl.appendChild(cell);
+    }
   }
 }
 
-// ===== Board Helpers =====
-function getEmptyCells() {
-  const empty = [];
-  for (let r = 0; r < boardSize; r++)
-    for (let c = 0; c < boardSize; c++)
-      if (board[r][c] === 0) empty.push({ r, c });
-  return empty;
-}
+createGridUI();
 
-function addTile(count = 1) {
-  const empty = getEmptyCells();
-  if (empty.length === 0) return;
-  count = Math.min(count, empty.length);
-  for (let i = 0; i < count; i++) {
-    const { r, c } = empty[Math.floor(Math.random() * empty.length)];
-    board[r][c] = Math.random() < 0.9 ? 2 : 4;
+/* --- ВСПОМОГАТЕЛИ --- */
+function createEmptyGrid() {
+  const g = [];
+  for (let i=0;i<SIZE;i++){
+    g.push(new Array(SIZE).fill(0));
   }
+  return g;
 }
 
-function saveState() {
-  history.push(JSON.parse(JSON.stringify(board)));
+function cloneGrid(g) {
+  return g.map(row => row.slice());
 }
 
-// ===== Undo =====
-function undo() {
-  if (history.length === 0 || overlay.style.display !== "none") return;
-  board = history.pop();
-  render();
+/* Сохранение/загрузка game state */
+function saveGameState() {
+  const state = { grid, score, gameOver };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) { console.warn('LocalStorage save failed', e); }
+}
+function loadGameState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    if (!s) return false;
+    grid = s.grid;
+    score = s.score || 0;
+    gameOver = !!s.gameOver;
+    return true;
+  } catch (e) { return false; }
+}
+function saveUndoState() {
+  undoState = { grid: cloneGrid(grid), score, gameOver };
+  try {
+    localStorage.setItem(UNDO_KEY, JSON.stringify(undoState));
+  } catch (e) {}
+}
+function loadUndoState() {
+  try {
+    const raw = localStorage.getItem(UNDO_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
 }
 
-// ===== Moves =====
-function moveLeftRow(row) {
-  const filtered = row.filter(x => x !== 0);
-  const merged = [];
-  let points = 0;
-  for (let i = 0; i < filtered.length; i++) {
-    if (filtered[i] === filtered[i + 1]) {
-      const val = filtered[i] * 2;
-      merged.push(val);
-      points += val;
-      i++;
-    } else merged.push(filtered[i]);
+/* ====== Лидерборд ====== */
+function loadLeaders() {
+  try {
+    const raw = localStorage.getItem(LEADERS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch (e) { return []; }
+}
+function saveLeaders(list) {
+  try {
+    localStorage.setItem(LEADERS_KEY, JSON.stringify(list));
+  } catch (e) {}
+}
+function addLeader(name, scoreValue) {
+  const list = loadLeaders();
+  list.push({ name: name || '---', score: scoreValue, date: new Date().toISOString() });
+  list.sort((a,b)=>b.score - a.score);
+  const top = list.slice(0,10);
+  saveLeaders(top);
+}
+
+/* ====== Игровая логика (движение/слияние) ====== */
+
+/* utility: rotate grid to reuse left-move logic */
+function rotateGrid(g) {
+  // rotate clockwise
+  const ng = createEmptyGrid();
+  for (let r=0;r<SIZE;r++){
+    for (let c=0;c<SIZE;c++){
+      ng[c][SIZE-1-r] = g[r][c];
+    }
   }
-  while (merged.length < boardSize) merged.push(0);
-  return { row: merged, points };
+  return ng;
 }
 
-function moveLeft() { return moveCore(r => r); }
-function moveRight() { return moveCore(r => r.reverse(), true); }
-function moveUp() { return moveCoreTranspose(moveLeft); }
-function moveDown() { return moveCoreTranspose(moveRight); }
-
-function moveCore(mapFn, reverse = false) {
-  let changed = false;
-  let pointsThisMove = 0;
-  for (let r = 0; r < boardSize; r++) {
-    const { row, points } = moveLeftRow(mapFn([...board[r]]));
-    pointsThisMove += points;
-    const newRow = reverse ? row.slice().reverse() : row;
-    if (newRow.some((v, i) => v !== board[r][i])) changed = true;
-    board[r] = newRow;
+/* slide & merge single row to the left. Возвращает {newRow, gainedScore, moved, mergedPositions} */
+function processRowLeft(row) {
+  // убираем нули
+  const original = row.slice();
+  const nonZero = row.filter(v=>v!==0);
+  const newRow = [];
+  let gained = 0;
+  let moved = false;
+  let skip = false;
+  for (let i=0;i<nonZero.length;i++){
+    if (skip) { skip = false; continue; }
+    if (i+1 < nonZero.length && nonZero[i] === nonZero[i+1]) {
+      const val = nonZero[i]*2;
+      newRow.push(val);
+      gained += val;
+      skip = true;
+      moved = true;
+    } else {
+      newRow.push(nonZero[i]);
+    }
   }
-  if (changed) {
-    score += pointsThisMove;
-    if(score > best) best = score;
-    saveState();
-    addTile(1 + (Math.random() < 0.3));
-    render();
+  while (newRow.length < SIZE) newRow.push(0);
+  // moved if any difference
+  for (let i=0;i<SIZE;i++){
+    if (newRow[i] !== original[i]) { moved = true; break; }
   }
-  checkGameOver();
-  return changed;
+  return { newRow, gained, moved };
 }
 
-function moveCoreTranspose(moveFunc) {
-  // transpose
-  board = board[0].map((_, c) => board.map(row => row[c]));
-  const changed = moveFunc();
-  // transpose back
-  board = board[0].map((_, c) => board.map(row => row[c]));
-  return changed;
+/* Возвращает {grid: newGrid, moved: bool, gained: points} */
+function moveLeft(board) {
+  let movedOverall = false;
+  let totalGain = 0;
+  const newGrid = createEmptyGrid();
+  for (let r=0;r<SIZE;r++){
+    const { newRow, gained, moved } = processRowLeft(board[r]);
+    totalGain += gained;
+    if (moved) movedOverall = true;
+    newGrid[r] = newRow;
+  }
+  return { grid: newGrid, moved: movedOverall, gained: totalGain };
+}
+function moveRight(board) {
+  // reverse rows, moveLeft, reverse back
+  const rev = board.map(row => row.slice().reverse());
+  const res = moveLeft(rev);
+  const back = res.grid.map(row => row.slice().reverse());
+  return { grid: back, moved: res.moved, gained: res.gained };
+}
+function moveUp(board) {
+  // rotate anticlockwise, moveLeft, rotate clockwise
+  let rot = cloneGrid(board);
+  // rotate anticlockwise 3 times == rotate clockwise 1 time reversed
+  // simpler: transpose and reverse columns...
+  // Implement by rotating clockwise 3 times
+  for (let i=0;i<1;i++) rot = rotateGrid(rot); // one clockwise
+  // If we want moveUp, rotate anticlockwise: do 3 clockwise. But easier: rotate clockwise 3 times for anticlockwise
+  // Let's implement correct: for moveUp rotate clockwise 3 times -> then moveLeft -> rotate clockwise 1 time back
+  rot = rotateGrid(rotateGrid(rotateGrid(board))); // 3 clockwise == anticlockwise
+  const res = moveLeft(rot);
+  // rotate back (1 clockwise)
+  const back = rotateGrid(res.grid);
+  return { grid: back, moved: res.moved, gained: res.gained };
+}
+function moveDown(board) {
+  // rotate clockwise once, moveLeft, rotate anticlockwise once
+  const rot = rotateGrid(board); // clockwise
+  const res = moveLeft(rot);
+  // rotate back 3 times (anticlockwise)
+  const back = rotateGrid(rotateGrid(rotateGrid(res.grid)));
+  return { grid: back, moved: res.moved, gained: res.gained };
 }
 
-// ===== Render =====
-function render() {
-  scoreEl.textContent = score;
-  bestEl.textContent = best;
+/* Проверка доступных ходов */
+function hasMoves(g) {
+  // empty cell?
+  for (let r=0;r<SIZE;r++){
+    for (let c=0;c<SIZE;c++){
+      if (g[r][c] === 0) return true;
+    }
+  }
+  // adjacent equal?
+  for (let r=0;r<SIZE;r++){
+    for (let c=0;c<SIZE-1;c++){
+      if (g[r][c] === g[r][c+1]) return true;
+    }
+  }
+  for (let c=0;c<SIZE;c++){
+    for (let r=0;r<SIZE-1;r++){
+      if (g[r][c] === g[r+1][c]) return true;
+    }
+  }
+  return false;
+}
 
-  document.querySelectorAll(".tile").forEach(t => t.remove());
-
-  board.forEach((row, r) => {
-    row.forEach((v, c) => {
-      if (v === 0) return;
-      const tile = document.createElement("div");
-      tile.className = `tile v${v} new`;
-      tile.textContent = v;
-      const x = c * (tileSize + gap);
-      const y = r * (tileSize + gap);
-      tile.style.transform = `translate(${x}px, ${y}px)`;
-      boardEl.appendChild(tile);
-    });
+/* Генерация 1-2 новых плиток в случайные пустые клетки (значения 2 или 4) */
+function spawnNewTiles(board, count=1) {
+  const empties = [];
+  for (let r=0;r<SIZE;r++){
+    for (let c=0;c<SIZE;c++){
+      if (board[r][c] === 0) empties.push({r,c});
+    }
+  }
+  if (empties.length === 0) return board;
+  // если запрошено более доступного, сократить
+  const toSpawn = Math.min(count, empties.length);
+  // выбираем случайные уникальные индексы
+  const chosen = [];
+  while (chosen.length < toSpawn){
+    const idx = Math.floor(Math.random()*empties.length);
+    if (!chosen.includes(idx)) chosen.push(idx);
+  }
+  chosen.forEach(idx => {
+    const pos = empties[idx];
+    const v = Math.random() < 0.9 ? 2 : 4;
+    board[pos.r][pos.c] = v;
   });
+  return board;
 }
 
-// ===== Game Over =====
-function checkGameOver() {
-  if (getEmptyCells().length > 0) return;
-  const clone = JSON.parse(JSON.stringify(board));
-  if (moveLeft() || moveRight() || moveUp() || moveDown()) {
-    board = clone;
+/* ====== Рендеринг плиток (DOM) ======
+   Подход: при каждом обновлении мы пересоздаём набор DOM-плиток,
+   но перед этим сохраняем boundingClientRect текущих плиток для плавной анимации.
+   Каждой плитке даём data-key (row-col-value-uid) — уникальный при создании.
+*/
+function renderGrid(oldPositions = null, mergedInfo = null) {
+  // Обновляем счет
+  scoreEl.textContent = String(score);
+
+  // Запомним старые прямоугольники
+  const oldRects = new Map();
+  Array.from(tilesLayer.children).forEach(el=>{
+    const key = el.dataset.key;
+    oldRects.set(key, el.getBoundingClientRect());
+  });
+
+  // Сохраняем старые элементы (для расчёта анимации)
+  const oldEls = Array.from(tilesLayer.children);
+  // Очистим слой
+  while (tilesLayer.firstChild) tilesLayer.removeChild(tilesLayer.firstChild);
+
+  // вычислим размеры клетки в пикселях
+  const gridRect = gridEl.getBoundingClientRect();
+  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tile-gap')) || 12;
+  const cellSize = (gridRect.width - gap * (SIZE+1)) / SIZE;
+
+  // создаём плитки по текущему grid
+  for (let r=0;r<SIZE;r++){
+    for (let c=0;c<SIZE;c++){
+      const val = grid[r][c];
+      if (val === 0) continue;
+      const tile = document.createElement('div');
+      tile.classList.add('tile');
+      tile.classList.add('v' + val);
+      tile.textContent = String(val);
+      // позиционируем абсолютно
+      tile.style.width = `${cellSize}px`;
+      tile.style.height = `${cellSize}px`;
+      tile.style.left = `${gap + c*(cellSize + gap)}px`;
+      tile.style.top  = `${gap + r*(cellSize + gap)}px`;
+      tile.dataset.row = r;
+      tile.dataset.col = c;
+      tile.dataset.val = val;
+      // уникальный ключ (включаем id counter, чтобы каждое создание было уникальным)
+      const uid = tileIdCounter++;
+      tile.dataset.key = `${r}-${c}-${val}-${uid}`;
+
+      // Если недавно созданная плитка (новая) — добавим класс для pop-анимации
+      // Отличить новую плитку можем если oldPositions passed and oldPositions at same (r,c) was 0
+      if (oldPositions) {
+        const wasEmpty = (oldPositions[r][c] === 0);
+        if (wasEmpty) tile.classList.add('new');
+      } else {
+        tile.classList.add('new');
+      }
+
+      tilesLayer.appendChild(tile);
+    }
+  }
+
+  // АНИМАЦИЯ ПЕРЕМЕЩЕНИЯ:
+  // Для плавного перемещения мы:
+  // - вычисляем newRects после вставки
+  // - для каждой tile с ключем (ключ старый для старых элементов) находим старый rect и new rect
+  // - ставим transform: translate(delta) на элемент и затем сбрасываем (анимируется)
+  const newRects = new Map();
+  Array.from(tilesLayer.children).forEach(el=>{
+    newRects.set(el.dataset.key, el.getBoundingClientRect());
+  });
+
+  // Поскольку ключи новые (uid меняется), нам не сматчить старые и новые напрямую.
+  // Поэтому мы match'им плитки по значению и по position changes heuristically:
+  // Для анимации перемещения сделаем простой эффект: плавное появление и лёгкий translate при смене позиции.
+  // Для более точной анимации можно хранить прошлую "карта значений" и сопоставлять, но для
+  // стабильного и чистого результата анимация scale+fade достаточна (merge/appear).
+
+  // Если хотим анимацию для перемещений: можем применить небольшой визуальный сдвиг от старой позиции
+  // Попытка простого сопоставления: для каждого new tile найдем ближайшее по значению и координате старый rect
+  const oldRectsArr = Array.from(oldRects.entries());
+  Array.from(tilesLayer.children).forEach(newEl=>{
+    // найдем возможный старый элемент с таким же value, ближайший по расстоянию
+    const val = Number(newEl.dataset.val);
+    let bestIdx = -1;
+    let bestDist = Infinity;
+    for (let i=0;i<oldRectsArr.length;i++){
+      const [key, rect] = oldRectsArr[i];
+      // извлечь value из key, если возможно
+      const parts = key.split('-'); // row-col-val-uid
+      const oldVal = Number(parts[2]);
+      if (oldVal !== val) continue;
+      const newRect = newEl.getBoundingClientRect();
+      const dx = newRect.left - rect.left;
+      const dy = newRect.top - rect.top;
+      const dist = Math.hypot(dx,dy);
+      if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+    }
+    if (bestIdx >= 0) {
+      const [oldKey, oldRect] = oldRectsArr[bestIdx];
+      const newRect = newEl.getBoundingClientRect();
+      const dx = oldRect.left - newRect.left;
+      const dy = oldRect.top - newRect.top;
+      // применим обратный сдвиг, потом уберём его, чтобы получить анимацию
+      newEl.style.transform = `translate(${dx}px, ${dy}px)`;
+      // force reflow
+      newEl.getBoundingClientRect();
+      newEl.style.transition = 'transform 140ms ease';
+      newEl.style.transform = '';
+      // удаляем использованный oldRect чтобы не повторно использовать
+      oldRectsArr.splice(bestIdx,1);
+    } else {
+      // новый элемент — уже имеет .new анимацию
+    }
+  });
+
+  // Merge animation: если mergedInfo — массив позиций которые были merge результат, применим класс .merge
+  if (mergedInfo && mergedInfo.length) {
+    // mergedInfo содержит список позиций (r,c) новых значений получившихся в результате слияния
+    mergedInfo.forEach(pos=>{
+      // найти плитку в tilesLayer с этими координатами и пометить
+      Array.from(tilesLayer.children).forEach(el=>{
+        if (Number(el.dataset.row) === pos.r && Number(el.dataset.col) === pos.c) {
+          el.classList.add('merge');
+          // удалить класс через 250ms
+          setTimeout(()=> el.classList.remove('merge'), 260);
+        }
+      });
+    });
+  }
+}
+
+/* ====== Игровые действия (API для UI) ====== */
+function startNewGame() {
+  grid = createEmptyGrid();
+  score = 0;
+  gameOver = false;
+  // в начале 1-3 случайных тайла
+  const initial = Math.floor(Math.random()*3) + 1; // 1..3
+  spawnNewTiles(grid, initial);
+  saveUndoState(); // сохраняем начальное для отмены
+  saveGameState();
+  renderGrid();
+  hideGameOverModal();
+}
+
+function performMove(direction) {
+  if (gameOver) return;
+  // сохраняем undo
+  saveUndoState();
+
+  let result;
+  if (direction === 'left') result = moveLeft(grid);
+  else if (direction === 'right') result = moveRight(grid);
+  else if (direction === 'up') result = moveUp(grid);
+  else if (direction === 'down') result = moveDown(grid);
+  else return;
+
+  if (!result.moved) {
+    // нет изменений — не генерируем новые плитки
     return;
   }
-  overlay.style.display = "flex";
+  // применяем новую сетку
+  grid = result.grid;
+  score += result.gained;
+
+  // Генерируем 1 или 2 новых плитки (случайно)
+  const spawnCount = (Math.random() < 0.25) ? 2 : 1; // примерно 25% шанс на 2
+  spawnNewTiles(grid, spawnCount);
+
+  // Проверка окончания игры
+  if (!hasMoves(grid)) {
+    gameOver = true;
+    showGameOverModal();
+  }
+
+  saveGameState();
+  renderGrid();
 }
 
-// ===== Leaderboard =====
-function saveScore() {
-  const name = inputName.value.trim();
-  if (!name) return;
-  const data = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-  data.push({ name, score, date: new Date().toLocaleString() });
-  data.sort((a,b) => b.score - a.score);
-  localStorage.setItem("leaderboard", JSON.stringify(data.slice(0,10)));
-  inputName.style.display = "none";
-  saveScoreBtn.textContent = "Сохранено";
+/* Undo */
+function undoMove() {
+  if (gameOver) return; // нельзя отменять ход после окончания игры
+  const raw = loadUndoState();
+  if (!raw) {
+    alert('Нет доступного хода для отмены');
+    return;
+  }
+  grid = raw.grid;
+  score = raw.score;
+  gameOver = raw.gameOver;
+  saveGameState();
+  renderGrid();
 }
 
-function renderLB() {
-  lbList.innerHTML = "";
-  const data = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-  data.forEach(r => {
-    const row = document.createElement("div");
-    row.className = "row";
-    row.textContent = `${r.name} — ${r.score} — ${r.date}`;
-    lbList.appendChild(row);
+/* Модалки */
+function showGameOverModal() {
+  modalMessage.textContent = `Игра окончена — ваш счёт: ${score}`;
+  saveRow.classList.remove('hidden');
+  playerNameInput.value = '';
+  playerNameInput.style.display = '';
+  saveScoreBtn.style.display = '';
+  gameOverModal.classList.remove('hidden');
+}
+function hideGameOverModal() {
+  gameOverModal.classList.add('hidden');
+}
+
+/* Лидерборд UI */
+function showLeaderboard() {
+  const list = loadLeaders();
+  // очистим тело
+  while (leadersTableBody.firstChild) leadersTableBody.removeChild(leadersTableBody.firstChild);
+  list.forEach((entry, idx) => {
+    const tr = document.createElement('tr');
+    const tdN = document.createElement('td'); tdN.textContent = String(idx+1);
+    const tdName = document.createElement('td'); tdName.textContent = entry.name;
+    const tdScore = document.createElement('td'); tdScore.textContent = String(entry.score);
+    const tdDate = document.createElement('td'); tdDate.textContent = (new Date(entry.date)).toLocaleString();
+    tr.appendChild(tdN); tr.appendChild(tdName); tr.appendChild(tdScore); tr.appendChild(tdDate);
+    leadersTableBody.appendChild(tr);
   });
+  leaderboardModal.classList.remove('hidden');
+}
+function hideLeaderboard() {
+  leaderboardModal.classList.add('hidden');
 }
 
-// ===== Restart =====
-function restart() {
-  score = 0;
-  history = [];
-  board = Array(boardSize).fill(null).map(() => Array(boardSize).fill(0));
-  addTile(2);
-  overlay.style.display = "none";
-  inputName.style.display = "block";
-  saveScoreBtn.textContent = "Сохранить";
-  render();
-}
-
-// ===== Controls =====
-undoBtn.onclick = undo;
-restartBtn.onclick = restart;
-saveScoreBtn.onclick = saveScore;
-lbBtn.onclick = () => { renderLB(); lbModal.style.display = "block"; };
-closeLB.onclick = () => lbModal.style.display = "none";
-
-document.addEventListener("keydown", e => {
-  if (overlay.style.display !== "none") return;
-  if (e.key === "ArrowLeft") moveLeft();
-  if (e.key === "ArrowRight") moveRight();
-  if (e.key === "ArrowUp") moveUp();
-  if (e.key === "ArrowDown") moveDown();
+/* Save score from modal */
+saveScoreBtn.addEventListener('click', ()=>{
+  const name = playerNameInput.value.trim() || '—';
+  addLeader(name, score);
+  // обновить UI
+  playerNameInput.style.display = 'none';
+  saveScoreBtn.style.display = 'none';
+  modalMessage.textContent = 'Ваш рекорд сохранён';
 });
 
-// ===== Mobile buttons =====
-document.getElementById("upBtn").onclick = moveUp;
-document.getElementById("downBtn").onclick = moveDown;
-document.getElementById("leftBtn").onclick = moveLeft;
-document.getElementById("rightBtn").onclick = moveRight;
+/* Кнопки модалки */
+modalRestartBtn.addEventListener('click', ()=>{
+  hideGameOverModal();
+  startNewGame();
+});
+modalCloseBtn.addEventListener('click', hideGameOverModal);
 
-// ===== Start game =====
-createGrid();
-restart();
+/* Leaderboard buttons */
+leaderBtn.addEventListener('click', ()=>{
+  showLeaderboard();
+});
+closeLeadersBtn.addEventListener('click', hideLeaderboard);
+clearLeadersBtn.addEventListener('click', ()=>{
+  if (!confirm('Очистить таблицу лидеров?')) return;
+  saveLeaders([]);
+  showLeaderboard();
+});
+
+/* Навешивание кнопок UI */
+newGameBtn.addEventListener('click', ()=> startNewGame());
+undoBtn.addEventListener('click', ()=> undoMove());
+
+/* Слушаем клавиатуру (desktop) */
+window.addEventListener('keydown', (e)=>{
+  if (leaderboardModal.classList.contains('hidden') === false) return; // если таблица видна — не мешаем
+  if (gameOver && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return;
+  if (e.key === 'ArrowLeft') { performMove('left'); e.preventDefault(); }
+  else if (e.key === 'ArrowRight') { performMove('right'); e.preventDefault(); }
+  else if (e.key === 'ArrowUp') { performMove('up'); e.preventDefault(); }
+  else if (e.key === 'ArrowDown') { performMove('down'); e.preventDefault(); }
+});
+
+/* ====== Свайпы (mobile) ====== */
+let touchStartX=0, touchStartY=0, touchStartTime=0;
+const minDist = 30; // минимум пикселей для признания свайпа
+gameContainer.addEventListener('touchstart', (e)=>{
+  if (!e.touches || e.touches.length === 0) return;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  touchStartTime = Date.now();
+}, {passive:true});
+gameContainer.addEventListener('touchend', (e)=>{
+  if (!e.changedTouches || e.changedTouches.length === 0) return;
+  const ex = e.changedTouches[0].clientX;
+  const ey = e.changedTouches[0].clientY;
+  const dx = ex - touchStartX;
+  const dy = ey - touchStartY;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < minDist) return;
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > 0) performMove('right'); else performMove('left');
+  } else {
+    if (dy > 0) performMove('down'); else performMove('up');
+  }
+}, {passive:true});
+
+/* ====== Загрузка состояния при старте ====== */
+function initFromStorageOrNew() {
+  const ok = loadGameState();
+  if (!ok) {
+    startNewGame();
+  } else {
+    // ensure grid dimensions ok
+    if (!grid || grid.length !== SIZE) {
+      startNewGame();
+      return;
+    }
+    renderGrid(grid); // передаём oldPositions чтобы пометить новые
+    // если gameOver true — показать модалку
+    if (gameOver) showGameOverModal();
+  }
+}
+initFromStorageOrNew();
+
+/* Когда закрывается leaderboard — обновим UI */
+leaderboardModal.addEventListener('transitionend', ()=>{ /* noop */ });
+
+/* Сохранение лидеров и состояния перед выгрузкой */
+window.addEventListener('beforeunload', ()=>{
+  saveGameState();
+  try { localStorage.setItem(UNDO_KEY, JSON.stringify(undoState)); } catch (e) {}
+});
+
+/* Дополнительно — наблюдаем за переключением видимости модалок, чтобы скрывать элементы управления (если бы они были) */
+const observer = new MutationObserver(()=>{
+  // Если таблица лидеров открыта — можно скрыть контролы (виртуальные) — в нашей реализации их нет,
+  // но поддерживаем правило: когда leaderboard открыт, отключаем обработку свайпов/клавиатуры by flag
+});
+observer.observe(leaderboardModal, { attributes:true, attributeFilter:['class'] });
+
+/* Конец файла */
