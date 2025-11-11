@@ -364,6 +364,16 @@ function performMove(direction) {
     return false;
   }
   
+  // Находим позиции слияний для анимации
+  const mergedPositions = [];
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      if (grid[r][c] > oldGrid[r][c] && oldGrid[r][c] !== 0) {
+        mergedPositions.push({ r, c });
+      }
+    }
+  }
+  
   // применяем новую сетку
   grid = result.grid;
   score += result.gained;
@@ -382,6 +392,20 @@ function performMove(direction) {
   
   // Передаем старое состояние для анимации
   renderGrid(oldGrid);
+  
+  // Запускаем анимацию слияния после отрисовки
+  if (mergedPositions.length > 0) {
+    setTimeout(() => {
+      mergedPositions.forEach(pos => {
+        const tile = tilesLayer.querySelector(`[data-row="${pos.r}"][data-col="${pos.c}"]`);
+        if (tile) {
+          tile.classList.add('merge');
+          setTimeout(() => tile.classList.remove('merge'), 400);
+        }
+      });
+    }, 50);
+  }
+  
   return true;
 }
 
