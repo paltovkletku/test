@@ -327,15 +327,54 @@ function renderGrid(oldGrid = null) {
   }
 }
 
-/* ======= ПРОСТАЯ И НАДЕЖНАЯ ДЕТЕКЦИЯ ======= */
+/* ======= УПРАВЛЕНИЕ УСТРОЙСТВАМИ ======= */
 
 function isMobileDevice() {
-  // Просто проверяем наличие тач-экрана
-  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  // 1. Проверяем User Agent
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+  
+  // 2. Проверяем тач-события
+  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  
+  // 3. Проверяем размер экрана и ориентацию
+  const isSmallScreen = window.innerWidth <= 1024;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  
+  // 4. Проверяем возможности указателя
+  const hasCoarsePointer = matchMedia('(pointer: coarse)').matches;
+  const hasFinePointer = matchMedia('(pointer: fine)').matches;
+  
+  // 5. Дополнительные проверки для современных браузеров
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+  const isMobileView = window.innerWidth <= 768;
+  
+  console.log('Device detection:', {
+    userAgent: navigator.userAgent,
+    isMobileUA,
+    hasTouch,
+    isSmallScreen,
+    hasCoarsePointer,
+    hasFinePointer,
+    isStandalone,
+    isMobileView,
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
+  
+  // Логика определения:
+  // - Если это мобильное устройство по User Agent ИЛИ
+  // - Есть тач-экран И (небольшой экран ИЛИ грубый указатель) ИЛИ
+  // - Режим standalone (PWA) И небольшой экран
+  return isMobileUA || 
+         (hasTouch && (isSmallScreen || hasCoarsePointer)) || 
+         (isStandalone && isMobileView);
 }
 
 function updateMobileControlsVisibility() {
   const isMobile = isMobileDevice();
+  
+  console.log('Show mobile controls:', isMobile);
   
   if (isMobile && 
       gameOverModal.classList.contains('hidden') && 
@@ -344,8 +383,6 @@ function updateMobileControlsVisibility() {
   } else {
     mobileControls.classList.remove('visible');
   }
-  
-  console.log('Touch device:', isMobile, 'Controls visible:', mobileControls.classList.contains('visible'));
 }
 
 /* ======= ОСНОВНЫЕ ФУНКЦИИ ИГРЫ ======= */
