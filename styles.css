@@ -115,16 +115,16 @@ main {
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
-/* Контейнер игры */
+/* Контейнер игры - ФИКСИРУЕМ РАЗМЕРЫ */
 .game-container { 
-  width:var(--grid-size); 
-  max-width: 92vw; /* Ограничиваем максимальную ширину */
+  width: min(var(--grid-size), 90vw, 90vh - 200px); /* Ограничиваем максимальный размер */
   background: linear-gradient(180deg,#fff3f8,#fff7fb); 
-  padding:20px; 
+  padding: min(20px, 3vw); /* Адаптивные отступы */
   border-radius:16px; 
   position:relative; 
   box-shadow: 0 8px 30px rgba(144,74,112,0.12); 
 }
+
 .grid {
   width:100%;
   aspect-ratio:1;
@@ -133,8 +133,8 @@ main {
   display:grid;
   grid-template-columns: repeat(4,1fr);
   grid-template-rows: repeat(4,1fr);
-  gap: var(--tile-gap);
-  padding: var(--tile-gap);
+  gap: min(var(--tile-gap), 2vw); /* Адаптивный gap */
+  padding: min(var(--tile-gap), 2vw); /* Адаптивный padding */
   position:relative;
   overflow:hidden;
   box-sizing:border-box;
@@ -148,14 +148,14 @@ main {
   height:100%;
 }
 
-/* слой плиток */
+/* слой плиток - ФИКСИРУЕМ ПОЗИЦИОНИРОВАНИЕ */
 .tiles-layer { 
   position:absolute; 
-  inset:20px; 
+  inset: min(20px, 3vw); /* Адаптивные отступы */
   pointer-events:none; 
 }
 
-/* Плитка с адаптивным шрифтом */
+/* Плитка с АБСОЛЮТНО АДАПТИВНЫМИ РАЗМЕРАМИ */
 .tile {
   position:absolute;
   display:flex;
@@ -163,30 +163,26 @@ main {
   justify-content:center;
   font-weight:600;
   border-radius:8px;
-  min-width:0;
-  min-height:0;
-  padding:8px;
-  font-size: clamp(16px, 4vw, 28px); /* Адаптивный шрифт */
+  /* Размеры рассчитываются динамически в JS */
+  box-sizing:border-box;
+  padding: 0; /* Убираем фиксированные padding */
   z-index: 2;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  /* Гарантируем, что текст помещается */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* Шрифт будет устанавливаться в JS */
 }
 
-/* Цвета плиток с адаптивными шрифтами */
+/* Цвета плиток */
 .tile.v2    { background: linear-gradient(135deg, #fce8f1, #f8d4e8); color: #8a6d7b; }
 .tile.v4    { background: linear-gradient(135deg, #f9d5e4, #f5c1dc); color: #8a6d7b; }
 .tile.v8    { background: linear-gradient(135deg, #f2a7c9, #ee93bc); color: white; }
 .tile.v16   { background: linear-gradient(135deg, #ee7dae, #ea69a2); color: white; }
 .tile.v32   { background: linear-gradient(135deg, #e05795, #dc4389); color: white; }
 .tile.v64   { background: linear-gradient(135deg, #d23f84, #ce2b7a); color: white; }
-.tile.v128  { background: linear-gradient(135deg, #c42c78, #c0186e); color: white; font-size: clamp(14px, 3.5vw, 26px); box-shadow: 0 5px 15px rgba(196, 44, 120, 0.3); }
-.tile.v256  { background: linear-gradient(135deg, #b71f6b, #b30b61); color: white; font-size: clamp(14px, 3.5vw, 26px); box-shadow: 0 5px 15px rgba(183, 31, 107, 0.3); }
-.tile.v512  { background: linear-gradient(135deg, #a71461, #a30057); color: white; font-size: clamp(12px, 3vw, 24px); box-shadow: 0 6px 18px rgba(167, 20, 97, 0.4); }
-.tile.v1024 { background: linear-gradient(135deg, #940c55, #90004b); color: white; font-size: clamp(11px, 2.8vw, 22px); box-shadow: 0 6px 18px rgba(148, 12, 85, 0.4); }
-.tile.v2048 { background: linear-gradient(135deg, #800043, #7c0039); color: white; font-size: clamp(11px, 2.8vw, 22px); box-shadow: 0 7px 20px rgba(128, 0, 67, 0.5); }
+.tile.v128  { background: linear-gradient(135deg, #c42c78, #c0186e); color: white; box-shadow: 0 5px 15px rgba(196, 44, 120, 0.3); }
+.tile.v256  { background: linear-gradient(135deg, #b71f6b, #b30b61); color: white; box-shadow: 0 5px 15px rgba(183, 31, 107, 0.3); }
+.tile.v512  { background: linear-gradient(135deg, #a71461, #a30057); color: white; box-shadow: 0 6px 18px rgba(167, 20, 97, 0.4); }
+.tile.v1024 { background: linear-gradient(135deg, #940c55, #90004b); color: white; box-shadow: 0 6px 18px rgba(148, 12, 85, 0.4); }
+.tile.v2048 { background: linear-gradient(135deg, #800043, #7c0039); color: white; box-shadow: 0 7px 20px rgba(128, 0, 67, 0.5); }
 
 /* Анимации */
 .tile.new { 
@@ -286,7 +282,7 @@ main {
   text-align: center;
 }
 
-/* Мобильные кнопки управления - ТОЛЬКО ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ */
+/* Мобильные кнопки управления - ПРОСТАЯ ЛОГИКА */
 .mobile-controls {
   position: fixed;
   bottom: 20px;
@@ -298,8 +294,11 @@ main {
   border-radius: 16px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
-  /* По умолчанию скрываем, пока JS не определит устройство */
-  display: none;
+  display: none; /* По умолчанию скрыто */
+}
+
+.mobile-controls.visible {
+  display: block; /* Показываем когда нужно */
 }
 
 .controls-row {
@@ -338,9 +337,8 @@ main {
 
 .hidden { display: none !important; }
 
-/* Responsive */
+/* Responsive - УПРОЩАЕМ */
 @media (max-width: 900px) {
-  :root { --grid-size: min(380px, 85vw); } /* Адаптивный размер */
   .game-area { 
     flex-direction: column; 
     align-items: center; 
@@ -355,23 +353,8 @@ main {
   }
 }
 
-/* Планшеты: скрываем мобильные кнопки, но адаптируем интерфейс */
-@media (max-width: 1024px) and (min-width: 769px) and (hover: none) and (pointer: coarse) {
-  /* Для планшетов с тач-интерфейсом */
-  .mobile-controls.mobile-visible {
-    display: block;
-  }
-  .info {
-    display: none;
-  }
-  .game-area {
-    margin-bottom: 140px;
-  }
-}
-
-/* Мобильные устройства */
-@media (max-width: 768px), (hover: none) and (pointer: coarse) {
-  .mobile-controls.mobile-visible {
+@media (max-width: 768px) {
+  .mobile-controls.visible {
     display: block;
   }
   
@@ -397,16 +380,13 @@ main {
   }
 }
 
-/* Десктоп - всегда скрываем мобильные кнопки */
-@media (min-width: 1025px), (hover: hover) and (pointer: fine) {
+@media (min-width: 769px) {
   .mobile-controls {
     display: none !important;
   }
 }
 
-/* Маленькие экраны */
 @media (max-width: 480px) {
-  :root { --grid-size: 92vw; }
   .header h1 { font-size: 24px; }
   .score-box > div:last-child { font-size: 18px; }
   
@@ -432,12 +412,5 @@ main {
     padding: 8px 14px;
     min-width: 90px;
     font-size: 14px;
-  }
-}
-
-/* Большие экраны */
-@media (min-width: 1200px) {
-  :root { 
-    --grid-size: min(450px, 40vw); /* Ограничиваем максимальный размер */
   }
 }
