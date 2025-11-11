@@ -2,87 +2,125 @@
 :root{
   --bg: #fff6fb;
   --panel: #ffffffcc;
-  --text: #5a3a4a; /* Мягкий темно-розовый вместо черного */
+  --text: #5a3a4a;
   --accent: #800043;
   --tile-gap: 12px;
-  --grid-size: 320px; /* desktop baseline */
+  --grid-size: 320px;
 }
 
 * { box-sizing: border-box; }
 html,body { 
   height:100%; 
   margin:0; 
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Более мягкий шрифт */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color:var(--text); 
   background: linear-gradient(180deg,#fff6fb, #fff0f8); 
 }
 
+/* Новый layout для header */
 .header { 
   display:flex; 
   align-items:center; 
-  justify-content:space-between; 
-  padding:16px 20px; 
-  gap:16px; 
-  max-width:1100px; 
+  justify-content:center; 
+  padding:20px; 
+  gap:40px; 
+  max-width:900px; 
   margin:0 auto; 
+  flex-wrap: wrap;
 }
 .header h1 { 
   margin:0; 
-  font-size:28px; 
+  font-size:32px; 
   letter-spacing:1px; 
-  color: #6d2c4d; /* Темно-розовый для заголовка */
-  font-weight: 600; /* Полужирный вместо жирного */
+  color: #6d2c4d;
+  font-weight: 600;
 }
-.controls-top { display:flex; align-items:center; gap:16px; }
+
+/* Контейнер для элементов управления */
+.controls-top { 
+  display:flex; 
+  align-items:center; 
+  gap:16px; 
+  flex-wrap: wrap;
+  justify-content: center;
+}
 
 .score-box { 
   background:var(--panel); 
-  padding:8px 12px; 
-  border-radius:8px; 
+  padding:12px 16px; 
+  border-radius:10px; 
   text-align:center; 
-  min-width:88px; 
+  min-width:100px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 .score-box > div:first-child { 
-  font-size:12px; 
+  font-size:13px; 
   color:#8a6d7b;
+  margin-bottom: 4px;
 }
 .score-box > div:last-child { 
-  font-weight:600; /* Полужирный */
-  font-size:18px; 
+  font-weight:600;
+  font-size:20px; 
 }
 
-.buttons { display:flex; gap:8px; }
+.buttons { display:flex; gap:10px; }
 .btn { 
   background:linear-gradient(180deg,#f9d5e4,#f2a7c9); 
   border:none; 
-  padding:8px 16px; 
-  border-radius:8px; 
+  padding:10px 18px; 
+  border-radius:10px; 
   cursor:pointer; 
-  font-weight:500; /* Средняя жирность */
-  color: #5a3a4a; /* Темно-розовый текст */
+  font-weight:500;
+  color: #5a3a4a;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  min-width: 100px;
 }
 .btn:hover {
   background:linear-gradient(180deg,#f2a7c9,#ee93bc);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 .btn-secondary { 
   background:transparent; 
-  border:1px solid rgba(90, 58, 74, 0.2); /* Темно-розовая граница */
+  border:1px solid rgba(90, 58, 74, 0.2);
   color: #5a3a4a;
 }
 
-main { max-width:1100px; margin:16px auto; padding:0 16px; }
-.game-area { display:flex; gap:20px; align-items:flex-start; justify-content:center; flex-wrap:wrap; }
+/* Основной контент */
+main { 
+  max-width:900px; 
+  margin:0 auto; 
+  padding:20px; 
+}
+.game-area { 
+  display:flex; 
+  gap:40px; 
+  align-items:flex-start; 
+  justify-content:center; 
+  flex-wrap:wrap; 
+}
+
+/* Блок с инструкцией */
+.info { 
+  max-width:280px; 
+  font-size:14px; 
+  color:#7b606b;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  background: rgba(255,255,255,0.5);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
 
 /* Контейнер игры */
 .game-container { 
   width:var(--grid-size); 
-  max-width:92vw; 
   background: linear-gradient(180deg,#fff3f8,#fff7fb); 
-  padding:18px; 
-  border-radius:12px; 
+  padding:20px; 
+  border-radius:16px; 
   position:relative; 
   box-shadow: 0 8px 30px rgba(144,74,112,0.12); 
 }
@@ -101,7 +139,7 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
   box-sizing:border-box;
 }
 
-/* ячейки фона (для вида) */
+/* ячейки фона */
 .grid .cell {
   background: rgba(255,255,255,0.08);
   border-radius:8px;
@@ -109,20 +147,20 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
   height:100%;
 }
 
-/* слой плиток — абсолютно позиционируемый */
+/* слой плиток */
 .tiles-layer { 
   position:absolute; 
-  inset:18px; 
+  inset:20px; 
   pointer-events:none; 
 }
 
-/* Плитка — абсолют */
+/* Плитка */
 .tile {
   position:absolute;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-weight:600; /* Полужирный */
+  font-weight:600;
   border-radius:8px;
   min-width:0;
   min-height:0;
@@ -132,7 +170,7 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* Улучшенные цвета плиток с градиентами */
+/* Цвета плиток */
 .tile.v2    { background: linear-gradient(135deg, #fce8f1, #f8d4e8); color: #8a6d7b; }
 .tile.v4    { background: linear-gradient(135deg, #f9d5e4, #f5c1dc); color: #8a6d7b; }
 .tile.v8    { background: linear-gradient(135deg, #f2a7c9, #ee93bc); color: white; }
@@ -145,7 +183,7 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
 .tile.v1024 { background: linear-gradient(135deg, #940c55, #90004b); color: white; font-size: 18px; box-shadow: 0 6px 18px rgba(148, 12, 85, 0.4); }
 .tile.v2048 { background: linear-gradient(135deg, #800043, #7c0039); color: white; font-size: 18px; box-shadow: 0 7px 20px rgba(128, 0, 67, 0.5); }
 
-/* Простые анимации */
+/* Анимации */
 .tile.new { 
   animation: tileAppear 400ms ease-out both; 
 }
@@ -214,7 +252,7 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
   margin-top:16px; 
 }
 
-/* Лидерборд таблица */
+/* Лидерборд */
 .leaders-table { 
   width:100%; 
   border-collapse:collapse; 
@@ -229,24 +267,18 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
   color: #5a3a4a;
 }
 
-/* Мелкие элементы */
-.info { 
-  max-width:360px; 
-  font-size:14px; 
-  color:#7b606b; /* Мягкий розово-серый */
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.5;
-}
+/* Футер */
 .footer { 
-  max-width:1100px; 
-  margin:18px auto; 
-  padding:0 16px; 
+  max-width:900px; 
+  margin:30px auto; 
+  padding:0 20px; 
   display:flex; 
   gap:18px; 
-  justify-content:space-between; 
-  color:#8a6d7b; /* Мягкий розово-серый */
+  justify-content:center; 
+  color:#8a6d7b;
   font-size:13px; 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
 }
 
 /* Мобильные кнопки управления */
@@ -281,8 +313,8 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
   border-radius: 12px;
   background: linear-gradient(180deg, #f9d5e4, #f2a7c9);
   font-size: 24px;
-  font-weight: 600; /* Полужирный */
-  color: #5a3a4a; /* Темно-розовый текст */
+  font-weight: 600;
+  color: #5a3a4a;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -297,13 +329,23 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
   background: linear-gradient(180deg, #f2a7c9, #ee7dae);
 }
 
-/* Класс для скрытия элементов */
 .hidden { display: none !important; }
 
 /* Responsive */
 @media (max-width: 900px) {
-  :root { --grid-size: 420px; }
-  .game-area { flex-direction: column; align-items: center; }
+  :root { --grid-size: 380px; }
+  .game-area { 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 30px;
+  }
+  .header {
+    gap: 20px;
+    padding: 15px;
+  }
+  .header h1 {
+    font-size: 28px;
+  }
 }
 
 @media (max-width: 767px) {
@@ -318,6 +360,19 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
   .game-area {
     margin-bottom: 120px;
   }
+  
+  .header {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .controls-top {
+    order: 2;
+  }
+  
+  .header h1 {
+    order: 1;
+  }
 }
 
 @media (min-width: 768px) {
@@ -326,10 +381,10 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   :root { --grid-size: 92vw; }
   .header h1 { font-size: 24px; }
-  .score-box > div:last-child { font-size: 16px; }
+  .score-box > div:last-child { font-size: 18px; }
   .tile { font-size: 18px; }
   
   .control-btn {
@@ -348,5 +403,11 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
   
   .modal-content {
     padding: 20px;
+  }
+  
+  .btn {
+    padding: 8px 14px;
+    min-width: 90px;
+    font-size: 14px;
   }
 }
