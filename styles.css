@@ -93,12 +93,7 @@ main { max-width:1100px; margin:16px auto; padding:0 16px; }
 
 .tile.merge { 
   animation: tileMerge 400ms cubic-bezier(0.4, 0, 0.2, 1) both;
-  z-index: 3; /* Поднимаем сливающиеся плитки выше остальных */
-}
-
-.tile.moving {
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 4; /* Двигающиеся плитки поверх всех */
+  z-index: 3;
 }
 
 /* Анимация появления новой плитки */
