@@ -462,6 +462,16 @@ main {
     padding: 8px 12px !important;
     min-width: 80px !important;
   }
+
+    
+  .score-box > div:first-child {
+    font-size: 11px !important;
+  }
+  
+  .score-box > div:last-child {
+    font-size: 16px !important;
+  }
+  
   
   .tiles-layer {
     inset: 8px !important;
