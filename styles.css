@@ -421,3 +421,24 @@ main {
     font-size: 13px;
   }
 }
+
+
+.mobile-controls {
+  /* ... ваши существующие стили ... */
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  bottom: max(20px, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 768px) {
+  .mobile-controls {
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    bottom: max(15px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-controls {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+}
