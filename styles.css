@@ -445,11 +445,49 @@ main {
   }
 }
 
-/* Уменьшаем игровое поле на очень маленьких экранах */
+/* Оптимизация для айфона - меняем расположение */
 @media (max-width: 380px) {
+  /* Делаем шапку компактнее */
+  .header {
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 10px !important;
+  }
+  
+  .header h1 {
+    font-size: 20px !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* Кнопки управления делаем компактнее */
+  .buttons {
+    gap: 5px !important;
+  }
+  
+  .btn {
+    padding: 5px 8px !important;
+    min-width: 60px !important;
+    font-size: 11px !important;
+  }
+  
+  /* Счет тоже компактнее */
+  .score-box {
+    padding: 6px 10px !important;
+    min-width: 70px !important;
+  }
+  
+  .score-box > div:first-child {
+    font-size: 10px !important;
+  }
+  
+  .score-box > div:last-child {
+    font-size: 14px !important;
+  }
+  
+  /* Игровое поле с отступами */
   .game-container {
-    width: 60vw !important;
-    margin-bottom: 60px !important;
+    width: 75vw !important;
+    margin: 10px auto 80px !important; /* Отступ сверху и снизу для стрелок */
   }
   
   .grid {
@@ -461,27 +499,7 @@ main {
     inset: 6px !important;
   }
   
-  /* Уменьшаем счет */
-  .score-box {
-    padding: 8px 12px !important;
-    min-width: 80px !important;
-  }
-  
-  .score-box > div:first-child {
-    font-size: 11px !important;
-  }
-  
-  .score-box > div:last-child {
-    font-size: 16px !important;
-  }
-  
-  /* Уменьшаем кнопки управления */
-  .btn {
-    padding: 6px 10px !important;
-    min-width: 70px !important;
-    font-size: 12px !important;
-  }
-  
+  /* Стрелки управления внизу */
   .mobile-controls {
     left: 50% !important;
     transform: translateX(-50%) !important;
