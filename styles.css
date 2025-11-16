@@ -484,19 +484,19 @@ main {
     font-size: 14px !important;
   }
   
-  /* Игровое поле с отступами */
+  /* Игровое поле с отступами - ВОЗВРАЩАЕМ НОРМАЛЬНЫЕ РАЗМЕРЫ */
   .game-container {
     width: 75vw !important;
-    margin: 10px auto 80px !important; /* Отступ сверху и снизу для стрелок */
+    margin: 10px auto 80px !important;
   }
   
   .grid {
-    gap: 6px !important;
-    padding: 6px !important;
+    gap: var(--tile-gap) !important; /* Возвращаем нормальный gap */
+    padding: min(var(--tile-gap), 2vw) !important; /* Возвращаем нормальный padding */
   }
   
   .tiles-layer {
-    inset: 6px !important;
+    inset: min(20px, 3vw) !important; /* Возвращаем нормальные отступы */
   }
   
   /* Стрелки управления внизу */
