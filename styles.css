@@ -448,8 +448,17 @@ main {
 /* Уменьшаем игровое поле на очень маленьких экранах */
 @media (max-width: 380px) {
   .game-container {
-    width: 85vw !important;
-    margin-bottom: 60px !important; /* Добавляем место для кнопок */
+    width: 70vw !important;
+    margin-bottom: 60px !important;
+  }
+  
+  .grid {
+    gap: 8px !important;
+    padding: 8px !important;
+  }
+  
+  .tiles-layer {
+    inset: 8px !important;
   }
   
   .mobile-controls {
