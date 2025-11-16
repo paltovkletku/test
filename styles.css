@@ -456,6 +456,12 @@ main {
     gap: 8px !important;
     padding: 8px !important;
   }
+
+  /* Уменьшаем счет */
+  .score-box {
+    padding: 8px 12px !important;
+    min-width: 80px !important;
+  }
   
   .tiles-layer {
     inset: 8px !important;
