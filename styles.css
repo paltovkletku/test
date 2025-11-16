@@ -182,6 +182,18 @@ main {
 .tile.v1024 { background: linear-gradient(135deg, #940c55, #90004b); color: white; box-shadow: 0 6px 18px rgba(148, 12, 85, 0.4); }
 .tile.v2048 { background: linear-gradient(135deg, #800043, #7c0039); color: white; box-shadow: 0 7px 20px rgba(128, 0, 67, 0.5); }
 
+/* Стили для очень больших значений (4096+) */
+.tile[data-val="4096"],
+.tile[data-val="8192"], 
+.tile[data-val="16384"],
+.tile[data-val="32768"] {
+  background: linear-gradient(135deg, #6c0030, #44001c);
+  color: white;
+  box-shadow: 0 8px 22px rgba(108, 0, 48, 0.6);
+  font-size: 80% !important;
+}
+
+
 /* Анимации */
 .tile.new { 
   animation: tileAppear 400ms ease-out both; 
