@@ -1,340 +1,295 @@
-:root {
-  --bg-color: #fff6fb;
-  --panel-color: #ffffffcc;
-  --text-color: #5a3a4a;
-  --accent-color: #800043;
+:root{
+  --bg: #fff6fb;
+  --panel: #ffffffcc;
+  --text: #5a3a4a;
+  --accent: #800043;
   --tile-gap: 12px;
   --grid-size: 400px;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  height: 100%;
-  margin: 0;
+* { box-sizing: border-box; }
+html,body { 
+  height:100%; 
+  margin:0; 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--text-color);
-  background: linear-gradient(180deg, #fff6fb, #fff0f8);
+  color:var(--text); 
+  background: linear-gradient(180deg,#fff6fb, #fff0f8); 
   touch-action: manipulation;
 }
 
-/* Шапка */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  gap: 40px;
-  max-width: 900px;
-  margin: 0 auto;
+/* Header */
+.header { 
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  padding:20px; 
+  gap:40px; 
+  max-width:900px; 
+  margin:0 auto; 
   flex-wrap: wrap;
 }
-
-.header h1 {
-  margin: 0;
-  font-size: 32px;
-  letter-spacing: 1px;
+.header h1 { 
+  margin:0; 
+  font-size:32px; 
+  letter-spacing:1px; 
   color: #6d2c4d;
   font-weight: 600;
 }
 
-/* Верхние элементы управления */
-.controls-top {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+/* Элементы управления */
+.controls-top { 
+  display:flex; 
+  align-items:center; 
+  gap:16px; 
   flex-wrap: wrap;
   justify-content: center;
 }
 
-.score-box {
-  background: var(--panel-color);
-  padding: 12px 16px;
-  border-radius: 10px;
-  text-align: center;
-  min-width: 100px;
+.score-box { 
+  background:var(--panel); 
+  padding:12px 16px; 
+  border-radius:10px; 
+  text-align:center; 
+  min-width:100px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
-
-.score-title {
-  font-size: 13px;
-  color: #8a6d7b;
+.score-box > div:first-child { 
+  font-size:13px; 
+  color:#8a6d7b;
   margin-bottom: 4px;
 }
-
-.score-value {
-  font-weight: 600;
-  font-size: 20px;
+.score-box > div:last-child { 
+  font-weight:600;
+  font-size:20px; 
 }
 
-.buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.btn {
-  background: linear-gradient(180deg, #f9d5e4, #f2a7c9);
-  border: none;
-  padding: 10px 18px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 500;
+.buttons { display:flex; gap:10px; }
+.btn { 
+  background:linear-gradient(180deg,#f9d5e4,#f2a7c9); 
+  border:none; 
+  padding:10px 18px; 
+  border-radius:10px; 
+  cursor:pointer; 
+  font-weight:500;
   color: #5a3a4a;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   min-width: 100px;
 }
-
 .btn:hover {
-  background: linear-gradient(180deg, #f2a7c9, #ee93bc);
+  background:linear-gradient(180deg,#f2a7c9,#ee93bc);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
-
-.btn-secondary {
-  background: transparent;
-  border: 1px solid rgba(90, 58, 74, 0.2);
+.btn-secondary { 
+  background:transparent; 
+  border:1px solid rgba(90, 58, 74, 0.2);
   color: #5a3a4a;
 }
 
-/* Основное содержимое */
-main {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
+/* Основной контент */
+main { 
+  max-width:900px; 
+  margin:0 auto; 
+  padding:20px; 
+}
+.game-area { 
+  display:flex; 
+  gap:40px; 
+  align-items:flex-start; 
+  justify-content:center; 
+  flex-wrap:wrap; 
 }
 
-.game-area {
-  display: flex;
-  gap: 40px;
-  align-items: flex-start;
-  justify-content: center;
-  flex-wrap: wrap;
+/* Блок с инструкцией */
+.info { 
+  max-width:280px; 
+  font-size:14px; 
+  color:#7b606b;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  background: rgba(255,255,255,0.5);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
 /* Игровое поле */
-.game-container {
+.game-container { 
   width: min(var(--grid-size), 90vw, 90vh - 200px);
-  background: linear-gradient(180deg, #fff3f8, #fff7fb);
+  background: linear-gradient(180deg,#fff3f8,#fff7fb); 
   padding: min(20px, 3vw);
-  border-radius: 16px;
-  position: relative;
-  box-shadow: 0 8px 30px rgba(144,74,112,0.12);
+  border-radius:16px; 
+  position:relative; 
+  box-shadow: 0 8px 30px rgba(144,74,112,0.12); 
 }
 
 .grid {
-  width: 100%;
-  aspect-ratio: 1;
+  width:100%;
+  aspect-ratio:1;
   background: rgba(255,255,255,0.06);
-  border-radius: 8px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
+  border-radius:8px;
+  display:grid;
+  grid-template-columns: repeat(4,1fr);
+  grid-template-rows: repeat(4,1fr);
   gap: min(var(--tile-gap), 2vw);
   padding: min(var(--tile-gap), 2vw);
-  position: relative;
-  overflow: hidden;
+  position:relative;
+  overflow:hidden;
+  box-sizing:border-box;
 }
 
-.grid-cell {
+/* Ячейки фона */
+.grid .cell {
   background: rgba(255,255,255,0.08);
-  border-radius: 8px;
-  width: 100%;
-  height: 100%;
+  border-radius:8px;
+  width:100%;
+  height:100%;
 }
 
-/* Слой с плитками */
-.tiles-layer {
-  position: absolute;
-  top: min(20px, 3vw);
-  left: min(20px, 3vw);
-  right: min(20px, 3vw);
-  bottom: min(20px, 3vw);
-  pointer-events: none;
+/* Слой плиток */
+.tiles-layer { 
+  position:absolute; 
+  inset: min(20px, 3vw);
+  pointer-events:none; 
 }
 
-/* Стили плиток */
+/* Плитки */
 .tile {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  border-radius: 8px;
+  position:absolute;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:600;
+  border-radius:8px;
+  box-sizing:border-box;
+  padding: 0;
+  z-index: 2;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* Цвета для разных значений плиток */
-.tile-2 {
-  background: linear-gradient(135deg, #fce8f1, #f8d4e8);
-  color: #8a6d7b;
-}
+/* Цвета плиток */
+.tile.v2    { background: linear-gradient(135deg, #fce8f1, #f8d4e8); color: #8a6d7b; }
+.tile.v4    { background: linear-gradient(135deg, #f9d5e4, #f5c1dc); color: #8a6d7b; }
+.tile.v8    { background: linear-gradient(135deg, #f2a7c9, #ee93bc); color: white; }
+.tile.v16   { background: linear-gradient(135deg, #ee7dae, #ea69a2); color: white; }
+.tile.v32   { background: linear-gradient(135deg, #e05795, #dc4389); color: white; }
+.tile.v64   { background: linear-gradient(135deg, #d23f84, #ce2b7a); color: white; }
+.tile.v128  { background: linear-gradient(135deg, #c42c78, #c0186e); color: white; box-shadow: 0 5px 15px rgba(196, 44, 120, 0.3); }
+.tile.v256  { background: linear-gradient(135deg, #b71f6b, #b30b61); color: white; box-shadow: 0 5px 15px rgba(183, 31, 107, 0.3); }
+.tile.v512  { background: linear-gradient(135deg, #a71461, #a30057); color: white; box-shadow: 0 6px 18px rgba(167, 20, 97, 0.4); }
+.tile.v1024 { background: linear-gradient(135deg, #940c55, #90004b); color: white; box-shadow: 0 6px 18px rgba(148, 12, 85, 0.4); }
+.tile.v2048 { background: linear-gradient(135deg, #800043, #7c0039); color: white; box-shadow: 0 7px 20px rgba(128, 0, 67, 0.5); }
 
-.tile-4 {
-  background: linear-gradient(135deg, #f9d5e4, #f5c1dc);
-  color: #8a6d7b;
-}
-
-.tile-8 {
-  background: linear-gradient(135deg, #f2a7c9, #ee93bc);
-  color: white;
-}
-
-.tile-16 {
-  background: linear-gradient(135deg, #ee7dae, #ea69a2);
-  color: white;
-}
-
-.tile-32 {
-  background: linear-gradient(135deg, #e05795, #dc4389);
-  color: white;
-}
-
-.tile-64 {
-  background: linear-gradient(135deg, #d23f84, #ce2b7a);
-  color: white;
-}
-
-.tile-128 {
-  background: linear-gradient(135deg, #c42c78, #c0186e);
-  color: white;
-  box-shadow: 0 5px 15px rgba(196, 44, 120, 0.3);
-}
-
-.tile-256 {
-  background: linear-gradient(135deg, #b71f6b, #b30b61);
-  color: white;
-  box-shadow: 0 5px 15px rgba(183, 31, 107, 0.3);
-}
-
-.tile-512 {
-  background: linear-gradient(135deg, #a71461, #a30057);
-  color: white;
-  box-shadow: 0 6px 18px rgba(167, 20, 97, 0.4);
-}
-
-.tile-1024 {
-  background: linear-gradient(135deg, #940c55, #90004b);
-  color: white;
-  box-shadow: 0 6px 18px rgba(148, 12, 85, 0.4);
-}
-
-.tile-2048 {
-  background: linear-gradient(135deg, #800043, #7c0039);
-  color: white;
-  box-shadow: 0 7px 20px rgba(128, 0, 67, 0.5);
-}
-
-/* Большие значения плиток */
-.tile-4096,
-.tile-8192,
-.tile-16384,
-.tile-32768 {
+/* Стили для очень больших значений (4096+) */
+.tile[data-val="4096"],
+.tile[data-val="8192"], 
+.tile[data-val="16384"],
+.tile[data-val="32768"] {
   background: linear-gradient(135deg, #6c0030, #44001c);
   color: white;
   box-shadow: 0 8px 22px rgba(108, 0, 48, 0.6);
-  font-size: 80%;
+  font-size: 80% !important;
 }
+
 
 /* Анимации */
-.tile-new {
-  animation: appear 0.4s ease-out;
+.tile.new { 
+  animation: tileAppear 400ms ease-out both; 
 }
 
-.tile-merge {
-  animation: merge 0.5s ease-out;
+.tile.merge { 
+  animation: tileMerge 500ms ease-out both;
   z-index: 3;
 }
 
-@keyframes appear {
-  0% {
+@keyframes tileAppear {
+  0% { 
     transform: scale(0.8);
     opacity: 0;
   }
-  100% {
+  100% { 
     transform: scale(1);
     opacity: 1;
   }
 }
 
-@keyframes merge {
-  0% {
+@keyframes tileMerge {
+  0% { 
     transform: scale(1);
   }
-  50% {
+  50% { 
     transform: scale(1.1);
   }
-  100% {
+  100% { 
     transform: scale(1);
   }
 }
 
 /* Модальные окна */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.45);
-  z-index: 300;
+.modal { 
+  position:fixed; 
+  inset:0; 
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  background: rgba(0,0,0,0.45); 
+  z-index:300; 
 }
-
-.modal-hidden {
-  display: none;
+.modal.hidden { display:none; }
+.modal-content { 
+  background:white; 
+  padding:24px; 
+  border-radius:12px; 
+  width:90%; 
+  max-width:480px; 
+  box-shadow:0 18px 60px rgba(0,0,0,0.25); 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
-.modal-content {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 480px;
-  box-shadow: 0 18px 60px rgba(0,0,0,0.25);
-}
-
-.save-row {
-  display: flex;
-  gap: 8px;
-  margin: 16px 0;
-}
-
-.name-input {
-  flex: 1;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid #e8d4e0;
+.save-row { display:flex; gap:8px; margin:16px 0; }
+.save-row input { 
+  flex:1; 
+  padding:10px 12px; 
+  border-radius:8px; 
+  border:1px solid #e8d4e0; 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #5a3a4a;
 }
-
-.modal-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  margin-top: 16px;
+.modal-actions { 
+  display:flex; 
+  gap:8px; 
+  justify-content:flex-end; 
+  margin-top:16px; 
 }
 
 /* Таблица лидеров */
-.leaders-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 12px;
+.leaders-table { 
+  width:100%; 
+  border-collapse:collapse; 
+  margin-top:12px; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.leaders-table th, .leaders-table td { 
+  padding:10px 8px; 
+  text-align:left; 
+  border-bottom:1px solid #f0dbe6; 
+  font-size:14px; 
+  color: #5a3a4a;
 }
 
-.leaders-table th,
-.leaders-table td {
-  padding: 10px 8px;
-  text-align: left;
-  border-bottom: 1px solid #f0dbe6;
-  font-size: 14px;
-  color: #5a3a4a;
+/* Футер */
+.footer { 
+  max-width:900px; 
+  margin:30px auto; 
+  padding:0 20px; 
+  display:flex; 
+  gap:18px; 
+  justify-content:center; 
+  color:#8a6d7b;
+  font-size:13px; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
 }
 
 /* Мобильные кнопки управления */
@@ -353,12 +308,19 @@ main {
   display: none;
 }
 
-.mobile-controls-visible {
-  display: block;
+.mobile-controls.visible {
+  display: block !important;
 }
 
-.mobile-controls-hidden {
-  display: none;
+.mobile-controls.hidden {
+  display: none !important;
+}
+
+/* На ПК всегда скрываем кнопки */
+@media (min-width: 1025px) {
+  .mobile-controls {
+    display: none !important;
+  }
 }
 
 .controls-row {
@@ -387,6 +349,8 @@ main {
   justify-content: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  touch-action: manipulation;
 }
 
 .control-btn:active {
@@ -394,33 +358,27 @@ main {
   background: linear-gradient(180deg, #f2a7c9, #ee7dae);
 }
 
-/* Адаптивность для планшетов */
+.hidden { display: none !important; }
+
+/* Адаптивность */
 @media (max-width: 900px) {
-  .game-area {
-    flex-direction: column;
-    align-items: center;
+  .game-area { 
+    flex-direction: column; 
+    align-items: center; 
     gap: 30px;
   }
-  
   .header {
     gap: 20px;
     padding: 15px;
   }
-  
   .header h1 {
     font-size: 28px;
   }
 }
 
-/* Адаптивность для маленьких планшетов */
 @media (max-width: 768px) {
-  .header h1 {
-    font-size: 24px;
-  }
-  
-  .score-value {
-    font-size: 18px;
-  }
+  .header h1 { font-size: 24px; }
+  .score-box > div:last-child { font-size: 18px; }
   
   .control-btn {
     width: 55px;
@@ -449,11 +407,8 @@ main {
   }
 }
 
-/* Адаптивность для телефонов */
 @media (max-width: 480px) {
-  .header h1 {
-    font-size: 22px;
-  }
+  .header h1 { font-size: 22px; }
   
   .control-btn {
     width: 50px;
@@ -482,55 +437,48 @@ main {
   }
 }
 
-/* Исправления для iPhone */
+/* Специальные исправления для iPhone */
 @supports (-webkit-touch-callout: none) {
   .mobile-controls {
-    bottom: max(30px, env(safe-area-inset-bottom) + 10px);
-    padding-bottom: max(20px, env(safe-area-inset-bottom) + 10px);
+    bottom: max(30px, env(safe-area-inset-bottom) + 10px) !important;
+    padding-bottom: max(20px, env(safe-area-inset-bottom) + 10px) !important;
   }
 }
 
-/* Очень маленькие экраны */
+/* Еще более компактные кнопки для очень маленьких экранов */
 @media (max-width: 380px) {
   .mobile-controls {
-    padding: 8px;
-    padding-bottom: max(8px, env(safe-area-inset-bottom));
-    bottom: max(5px, env(safe-area-inset-bottom));
+    padding: 8px !important;
+    padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
+    bottom: max(5px, env(safe-area-inset-bottom)) !important;
   }
   
   .control-btn {
-    width: 45px;
-    height: 45px;
-    font-size: 18px;
+    width: 45px !important;
+    height: 45px !important;
+    font-size: 18px !important;
   }
   
   .controls-row {
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
   }
 }
 
-/* Альтернативное расположение для очень маленьких экранов */
+/* Альтернативное расположение - сбоку */
 @media (max-width: 380px) and (max-height: 700px) {
   .mobile-controls {
-    left: 10px;
-    transform: none;
-    top: 50%;
-    bottom: auto;
-    transform: translateY(-50%);
-    flex-direction: column;
-    padding: 10px;
+    left: 10px !important;
+    transform: none !important;
+    top: 50% !important;
+    bottom: auto !important;
+    transform: translateY(-50%) !important;
+    flex-direction: column !important;
+    padding: 10px !important;
   }
   
   .controls-row {
-    flex-direction: column;
-    gap: 5px;
-  }
-}
-
-/* На компьютерах скрываем мобильные кнопки */
-@media (min-width: 1025px) {
-  .mobile-controls {
-    display: none;
+    flex-direction: column !important;
+    gap: 5px !important;
   }
 }
