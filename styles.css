@@ -17,7 +17,7 @@ html,body {
   touch-action: manipulation;
 }
 
-/* Header */
+/* заголовки */
 .header { 
   display:flex; 
   align-items:center; 
@@ -36,7 +36,7 @@ html,body {
   font-weight: 600;
 }
 
-/* Элементы управления */
+/* управление */
 .controls-top { 
   display:flex; 
   align-items:center; 
@@ -88,7 +88,7 @@ html,body {
   color: #5a3a4a;
 }
 
-/* Основной контент */
+/* основное */
 main { 
   max-width:900px; 
   margin:0 auto; 
@@ -102,20 +102,8 @@ main {
   flex-wrap:wrap; 
 }
 
-/* Блок с инструкцией */
-.info { 
-  max-width:280px; 
-  font-size:14px; 
-  color:#7b606b;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.6;
-  background: rgba(255,255,255,0.5);
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-}
 
-/* Игровое поле */
+/* поле */
 .game-container { 
   width: min(var(--grid-size), 90vw, 90vh - 200px);
   background: linear-gradient(180deg,#fff3f8,#fff7fb); 
@@ -140,7 +128,6 @@ main {
   box-sizing:border-box;
 }
 
-/* Ячейки фона */
 .grid .cell {
   background: rgba(255,255,255,0.08);
   border-radius:8px;
@@ -148,14 +135,12 @@ main {
   height:100%;
 }
 
-/* Слой плиток */
 .tiles-layer { 
   position:absolute; 
   inset: min(20px, 3vw);
   pointer-events:none; 
 }
 
-/* Плитки */
 .tile {
   position:absolute;
   display:flex;
@@ -169,7 +154,6 @@ main {
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* Цвета плиток */
 .tile.v2    { background: linear-gradient(135deg, #fce8f1, #f8d4e8); color: #8a6d7b; }
 .tile.v4    { background: linear-gradient(135deg, #f9d5e4, #f5c1dc); color: #8a6d7b; }
 .tile.v8    { background: linear-gradient(135deg, #f2a7c9, #ee93bc); color: white; }
@@ -182,7 +166,6 @@ main {
 .tile.v1024 { background: linear-gradient(135deg, #940c55, #90004b); color: white; box-shadow: 0 6px 18px rgba(148, 12, 85, 0.4); }
 .tile.v2048 { background: linear-gradient(135deg, #800043, #7c0039); color: white; box-shadow: 0 7px 20px rgba(128, 0, 67, 0.5); }
 
-/* Стили для очень больших значений (4096+) */
 .tile[data-val="4096"],
 .tile[data-val="8192"], 
 .tile[data-val="16384"],
@@ -194,7 +177,7 @@ main {
 }
 
 
-/* Анимации */
+/* анимации (без слайдов) */
 .tile.new { 
   animation: tileAppear 400ms ease-out both; 
 }
@@ -227,7 +210,7 @@ main {
   }
 }
 
-/* Модальные окна */
+/* модалки */
 .modal { 
   position:fixed; 
   inset:0; 
@@ -263,7 +246,6 @@ main {
   margin-top:16px; 
 }
 
-/* Таблица лидеров */
 .leaders-table { 
   width:100%; 
   border-collapse:collapse; 
@@ -278,7 +260,6 @@ main {
   color: #5a3a4a;
 }
 
-/* Футер */
 .footer { 
   max-width:900px; 
   margin:30px auto; 
@@ -292,7 +273,7 @@ main {
   text-align: center;
 }
 
-/* Мобильные кнопки управления */
+/* мобильные кнопки управления */
 .mobile-controls {
   position: fixed;
   bottom: max(20px, env(safe-area-inset-bottom));
@@ -316,7 +297,6 @@ main {
   display: none !important;
 }
 
-/* На ПК всегда скрываем кнопки */
 @media (min-width: 1025px) {
   .mobile-controls {
     display: none !important;
@@ -360,7 +340,7 @@ main {
 
 .hidden { display: none !important; }
 
-/* Адаптивность */
+/* адаптивность*/
 @media (max-width: 900px) {
   .game-area { 
     flex-direction: column; 
@@ -437,7 +417,7 @@ main {
   }
 }
 
-/* Специальные исправления для iPhone */
+/* для айфонов */
 @supports (-webkit-touch-callout: none) {
   .mobile-controls {
     bottom: max(30px, env(safe-area-inset-bottom) + 10px) !important;
@@ -445,9 +425,7 @@ main {
   }
 }
 
-/* Оптимизация для айфона - меняем расположение */
 @media (max-width: 380px) {
-  /* Делаем шапку компактнее */
   .header {
     flex-direction: column !important;
     gap: 10px !important;
@@ -459,7 +437,6 @@ main {
     margin-bottom: 0 !important;
   }
   
-  /* Кнопки управления делаем компактнее */
   .buttons {
     gap: 5px !important;
   }
@@ -470,7 +447,6 @@ main {
     font-size: 11px !important;
   }
   
-  /* Счет тоже компактнее */
   .score-box {
     padding: 6px 10px !important;
     min-width: 70px !important;
@@ -484,22 +460,20 @@ main {
     font-size: 14px !important;
   }
   
-  /* Игровое поле с отступами - ВОЗВРАЩАЕМ НОРМАЛЬНЫЕ РАЗМЕРЫ */
   .game-container {
     width: 75vw !important;
     margin: 10px auto 80px !important;
   }
   
   .grid {
-    gap: var(--tile-gap) !important; /* Возвращаем нормальный gap */
-    padding: min(var(--tile-gap), 2vw) !important; /* Возвращаем нормальный padding */
+    gap: var(--tile-gap) !important; 
+    padding: min(var(--tile-gap), 2vw) !important; 
   }
   
   .tiles-layer {
-    inset: min(20px, 3vw) !important; /* Возвращаем нормальные отступы */
+    inset: min(20px, 3vw) !important; 
   }
   
-  /* Стрелки управления внизу */
   .mobile-controls {
     left: 50% !important;
     transform: translateX(-50%) !important;
