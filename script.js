@@ -149,7 +149,7 @@ function addToLeaders(name, playerScore) {
 }
 
 function createGrid() {
-  gridEl.innerHTML = '';
+gridEl.replaceChildren();
   
   for (let row = 0; row < SIZE; row++) {
     for (let col = 0; col < SIZE; col++) {
@@ -320,7 +320,7 @@ function getFontSize(value, cellSize) {
 
 function drawGrid(previousGrid = null) {
   scoreEl.textContent = String(score);
-  tilesLayer.innerHTML = '';
+  tilesLayer.replaceChildren();
 
   const { cellSize, gap } = getTileSize();
 
