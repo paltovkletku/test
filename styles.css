@@ -418,12 +418,6 @@ main {
 }
 
 /* для айфонов */
-@supports (-webkit-touch-callout: none) {
-  .mobile-controls {
-    bottom: max(30px, env(safe-area-inset-bottom) + 10px) !important;
-    padding-bottom: max(20px, env(safe-area-inset-bottom) + 10px) !important;
-  }
-}
 
 @media (max-width: 380px) {
   .header {
