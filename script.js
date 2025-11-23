@@ -388,7 +388,6 @@ function undoMove() {
   if (gameOver) return;
   const previousState = loadForUndo();
   if (!previousState) {
-    alert('Нет хода для отмены');
     return;
   }
   grid = previousState.grid;
