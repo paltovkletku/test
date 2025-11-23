@@ -415,14 +415,19 @@ function hideGameOverModal() {
 
 function showLeaderboard() {
   const leaders = getLeaders();
-  leadersTableBody.innerHTML = '';
+  leadersTableBody.replaceChildren();
   leaders.forEach((player, index) => {
     const row = document.createElement('tr');
-    const numberCell = document.createElement('td'); numberCell.textContent = String(index + 1);
-    const nameCell = document.createElement('td'); nameCell.textContent = player.name;
-    const scoreCell = document.createElement('td'); scoreCell.textContent = String(player.score);
-    const dateCell = document.createElement('td'); dateCell.textContent = new Date(player.date).toLocaleString();
-    row.appendChild(numberCell); row.appendChild(nameCell); row.appendChild(scoreCell); row.appendChild(dateCell);
+    const numberCell = document.createElement('td'); 
+    numberCell.textContent = String(index + 1);
+    const nameCell = document.createElement('td'); 
+    nameCell.textContent = player.name;
+    const scoreCell = document.createElement('td'); 
+    scoreCell.textContent = String(player.score);
+    const dateCell = document.createElement('td'); 
+    dateCell.textContent = new Date(player.date).toLocaleString();
+    row.appendChild(numberCell); row.appendChild(nameCell); 
+    row.appendChild(scoreCell); row.appendChild(dateCell);
     leadersTableBody.appendChild(row);
   });
   leaderboardModal.classList.remove('hidden');
