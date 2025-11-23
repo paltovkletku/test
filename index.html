@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>2048 — Лабораторная</title>
+  <title>2048 - Pink Edition</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -25,14 +25,12 @@
   <main>
     <section class="game-area">
       <div id="gameContainer" class="game-container" aria-label="Игровое поле" tabindex="0">
-        <!-- Сюда JS динамически создаёт grid и плитки -->
         <div class="grid"></div>
         <div class="tiles-layer"></div>
       </div>
     </section>
   </main>
 
-  <!-- Блок кнопок управления для мобильных устройств -->
   <div id="mobileControls" class="mobile-controls hidden">
     <div class="controls-row">
       <button id="upBtn" class="control-btn" data-direction="up">↑</button>
@@ -44,7 +42,6 @@
     </div>
   </div>
 
-  <!-- Модалка Game Over / Save -->
   <div id="gameOverModal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-content">
       <h2 id="modalMessage">Игра окончена</h2>
@@ -59,17 +56,16 @@
     </div>
   </div>
 
-  <!-- Лидерборд -->
   <div id="leaderboardModal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-content leaderboard-content">
-      <h2>Таблица лидеров — Топ 10</h2>
+      <h2>Таблица лидеров - Топ 10</h2>
       <div class="leaders-container">
         <table id="leadersTable" class="leaders-table" aria-label="Таблица лидеров">
           <thead>
             <tr><th>№</th><th>Имя</th><th>Очки</th><th>Дата</th></tr>
           </thead>
           <tbody>
-            <!-- Содержимое генерируется JS -->
+            <! ---генерирует джава--- !>
           </tbody>
         </table>
       </div>
