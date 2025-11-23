@@ -38,7 +38,7 @@ let grid = [];
 let score = 0;
 let gameOver = false;
 let undoState = null;
-let tileIdCounter = 0;
+let tileIdCounter = 1;
 let isMobileDevice = false;
 
 // тип устройства 
@@ -63,9 +63,6 @@ function updateMobileControls() {
     mobileControls.classList.add('hidden');
   }
 }
-
-
-
 
 function createEmptyGrid() {
   const newGrid = [];
@@ -149,7 +146,7 @@ function addToLeaders(name, playerScore) {
 }
 
 function createGrid() {
-gridEl.replaceChildren();
+  gridEl.replaceChildren();
   
   for (let row = 0; row < SIZE; row++) {
     for (let col = 0; col < SIZE; col++) {
@@ -290,7 +287,6 @@ function addNewTiles(gameGrid, count = 1) {
     if (!usedIndexes.includes(randomIndex)) {
       usedIndexes.push(randomIndex);
       const position = emptyCells[randomIndex];
-      // 90% chance for 2, 10% for 4
       const value = Math.random() < 0.9 ? 2 : 4;
       gameGrid[position.row][position.col] = value;
     }
@@ -301,27 +297,21 @@ function addNewTiles(gameGrid, count = 1) {
 
 function getTileSize() {
   const gridRect = gridEl.getBoundingClientRect();
-  const gap = 12; // стандартный отступ
+  const gap = 12;
   const cellSize = (gridRect.width - gap * (SIZE + 1)) / SIZE;
   return { cellSize, gap };
 }
 
 function getFontSize(value, cellSize) {
   let size = cellSize * 0.4;
-  
-  if (value >= 1024) {
-    size = cellSize * 0.3;
-  } else if (value >= 128) {
-    size = cellSize * 0.35;
-  }
-  
+  if (value >= 1024) size = cellSize * 0.3;
+  else if (value >= 128) size = cellSize * 0.35;
   return Math.max(12, Math.min(32, size));
 }
 
 function drawGrid(previousGrid = null) {
   scoreEl.textContent = String(score);
   tilesLayer.replaceChildren();
-
   const { cellSize, gap } = getTileSize();
 
   for (let row = 0; row < SIZE; row++) {
@@ -332,16 +322,12 @@ function drawGrid(previousGrid = null) {
       const tile = document.createElement('div');
       tile.classList.add('tile', 'v' + value);
       tile.textContent = String(value);
-      
       tile.style.width = `${cellSize}px`;
       tile.style.height = `${cellSize}px`;
       tile.style.left = `${gap + col * (cellSize + gap)}px`;
       tile.style.top = `${gap + row * (cellSize + gap)}px`;
-      
-      const fontSize = getFontSize(value, cellSize);
-      tile.style.fontSize = `${fontSize}px`;
+      tile.style.fontSize = `${getFontSize(value, cellSize)}px`;
       tile.style.lineHeight = `${cellSize}px`;
-      
       tile.dataset.row = row;
       tile.dataset.col = col;
       tile.dataset.val = value;
@@ -350,12 +336,8 @@ function drawGrid(previousGrid = null) {
       if (previousGrid) {
         const wasEmpty = (previousGrid[row][col] === 0);
         const wasMerged = (previousGrid[row][col] !== 0 && value === previousGrid[row][col] * 2);
-        
-        if (wasEmpty) {
-          tile.classList.add('new');
-        } else if (wasMerged) {
-          tile.classList.add('merge');
-        }
+        if (wasEmpty) tile.classList.add('new');
+        else if (wasMerged) tile.classList.add('merge');
       } else {
         tile.classList.add('new');
       }
@@ -369,10 +351,8 @@ function startNewGame() {
   grid = createEmptyGrid();
   score = 0;
   gameOver = false;
-  
   const initialTiles = Math.floor(Math.random() * 2) + 2;
   addNewTiles(grid, initialTiles);
-  
   saveForUndo();
   saveGame();
   drawGrid();
@@ -382,32 +362,22 @@ function startNewGame() {
 
 function makeMove(direction) {
   if (gameOver) return false;
-  
   const oldGrid = copyGrid(grid);
   saveForUndo();
-
   let result;
   if (direction === 'left') result = moveLeft(grid);
   else if (direction === 'right') result = moveRight(grid);
   else if (direction === 'up') result = moveUp(grid);
   else if (direction === 'down') result = moveDown(grid);
   else return false;
-
-  if (!result.moved) {
-    return false;
-  }
-  
+  if (!result.moved) return false;
   grid = result.grid;
   score += result.gained;
-
-  const newTilesCount = Math.random() < 0.25 ? 2 : 1;
-  addNewTiles(grid, newTilesCount);
-
+  addNewTiles(grid, Math.random() < 0.25 ? 2 : 1);
   if (!canMove(grid)) {
     gameOver = true;
     showGameOverModal();
   }
-
   saveGame();
   drawGrid(oldGrid);
   updateMobileControls();
@@ -416,23 +386,21 @@ function makeMove(direction) {
 
 function undoMove() {
   if (gameOver) return;
-  
   const previousState = loadForUndo();
   if (!previousState) {
+    alert('Нет хода для отмены');
     return;
   }
-  
   grid = previousState.grid;
   score = previousState.score;
   gameOver = previousState.gameOver;
-  
   saveGame();
   drawGrid();
   updateMobileControls();
 }
 
 function showGameOverModal() {
-  modalMessage.textContent = `Игра окончена - ваш счёт: ${score}`;
+  modalMessage.textContent = `Игра окончена — ваш счёт: ${score}`;
   saveRow.classList.remove('hidden');
   playerNameInput.value = '';
   playerNameInput.style.display = '';
@@ -449,30 +417,15 @@ function hideGameOverModal() {
 function showLeaderboard() {
   const leaders = getLeaders();
   leadersTableBody.innerHTML = '';
-  
   leaders.forEach((player, index) => {
     const row = document.createElement('tr');
-    
-    const numberCell = document.createElement('td');
-    numberCell.textContent = String(index + 1);
-    
-    const nameCell = document.createElement('td');
-    nameCell.textContent = player.name;
-    
-    const scoreCell = document.createElement('td');
-    scoreCell.textContent = String(player.score);
-    
-    const dateCell = document.createElement('td');
-    dateCell.textContent = new Date(player.date).toLocaleString();
-    
-    row.appendChild(numberCell);
-    row.appendChild(nameCell);
-    row.appendChild(scoreCell);
-    row.appendChild(dateCell);
-    
+    const numberCell = document.createElement('td'); numberCell.textContent = String(index + 1);
+    const nameCell = document.createElement('td'); nameCell.textContent = player.name;
+    const scoreCell = document.createElement('td'); scoreCell.textContent = String(player.score);
+    const dateCell = document.createElement('td'); dateCell.textContent = new Date(player.date).toLocaleString();
+    row.appendChild(numberCell); row.appendChild(nameCell); row.appendChild(scoreCell); row.appendChild(dateCell);
     leadersTableBody.appendChild(row);
   });
-  
   leaderboardModal.classList.remove('hidden');
   updateMobileControls();
 }
@@ -485,18 +438,12 @@ function hideLeaderboard() {
 function initializeGame() {
   checkDeviceType();
   createGrid();
-  
   const loaded = loadGame();
-  if (!loaded) {
-    startNewGame();
-  } else {
-    if (!grid || grid.length !== SIZE) {
-      startNewGame();
-      return;
-    }
-    drawGrid();
+  if (!loaded) startNewGame();
+  else {
+    if (!grid || grid.length !== SIZE) startNewGame();
+    else drawGrid();
   }
-  
   undoState = loadForUndo();
   updateMobileControls();
 }
@@ -535,28 +482,14 @@ rightBtn.addEventListener('click', () => makeMove('right'));
 window.addEventListener('keydown', (event) => {
   if (!leaderboardModal.classList.contains('hidden')) return;
   if (gameOver && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)) return;
-  
   if (event.key === 'ArrowLeft') { makeMove('left'); event.preventDefault(); }
   else if (event.key === 'ArrowRight') { makeMove('right'); event.preventDefault(); }
   else if (event.key === 'ArrowUp') { makeMove('up'); event.preventDefault(); }
   else if (event.key === 'ArrowDown') { makeMove('down'); event.preventDefault(); }
 });
 
-window.addEventListener('resize', () => {
-  drawGrid();
-});
-
-window.addEventListener('orientationchange', () => {
-  setTimeout(() => {
-    drawGrid();
-  }, 300);
-});
-
-window.addEventListener('beforeunload', () => {
-  saveGame();
-  try { 
-    localStorage.setItem(UNDO_KEY, JSON.stringify(undoState)); 
-  } catch (e) {}
-});
+window.addEventListener('resize', () => { drawGrid(); });
+window.addEventListener('orientationchange', () => { setTimeout(() => { drawGrid(); }, 300); });
+window.addEventListener('beforeunload', () => { saveGame(); try { localStorage.setItem(UNDO_KEY, JSON.stringify(undoState)); } catch(e){} });
 
 document.addEventListener('DOMContentLoaded', initializeGame);
