@@ -38,6 +38,7 @@ let grid = [];
 let score = 0;
 let gameOver = false;
 let undoState = null;
+let tileIdCounter = 0;
 let isMobileDevice = false;
 
 // тип устройства 
