@@ -11,7 +11,6 @@ const toggleAddCityBtn = document.getElementById('toggleAddCity');
 
 let lastSearchResults = [];
 
-/* ================== STORAGE ================== */
 
 function saveToStorage() {
   localStorage.setItem('cities', JSON.stringify(cities));
@@ -35,7 +34,10 @@ function loadFromStorage() {
   }
 }
 
-/* ================== GEOLOCATION ================== */
+
+
+
+/* геолокация */
 
 function requestGeolocation() {
   if (!navigator.geolocation) {
@@ -65,7 +67,10 @@ function requestGeolocation() {
   );
 }
 
-/* ================== CITIES ================== */
+
+
+
+/* города */
 
 function renderCities() {
   citiesEl.innerHTML = '';
@@ -109,8 +114,11 @@ function renderCities() {
   });
 }
 
-/* ================== WEATHER ================== */
 
+
+/* погода */
+
+/* код погоды (weathercode) в тип погоды*/
 function getWeatherDescription(code) {
   if (code === 0) return 'Clear sky ☀️';
   if (code <= 3) return 'Partly cloudy ⛅';
@@ -149,19 +157,15 @@ function loadWeather(city) {
 function renderWeather(data) {
   let html = `<h2>${activeCity.country ? activeCity.name + ', ' + activeCity.country : activeCity.name}</h2>`;
 
-  // Получаем сегодняшнюю дату
   const today = new Date();
   
   for (let i = 0; i < 3; i++) {
-    // Создаем дату для каждого дня
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     
-    // Форматируем дату
     const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
     const dayMonth = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
     
-    // Определяем заголовок
     let dayTitle;
     if (i === 0) {
       dayTitle = `Today, ${dayMonth}`;
@@ -196,7 +200,9 @@ function renderWeather(data) {
   weatherEl.innerHTML = html;
 }
 
-/* ================== CITY SUGGESTIONS ================== */
+
+
+/* выпадающий список городов */
 
 cityInput.addEventListener('input', () => {
   const value = cityInput.value.trim();
@@ -214,7 +220,6 @@ cityInput.addEventListener('input', () => {
     })
     .then(data => {
       if (!data.results) {
-        // Город не найден - просто скрываем подсказки
         return;
       }
 
@@ -225,7 +230,7 @@ cityInput.addEventListener('input', () => {
         li.textContent = `${city.name}, ${city.country}`;
 
         li.onclick = () => {
-          cityInput.dataset.index = i; // сохраняем индекс выбранного города
+          cityInput.dataset.index = i;
           cityInput.value = `${city.name}, ${city.country}`;
           suggestionsEl.innerHTML = '';
         };
@@ -234,12 +239,12 @@ cityInput.addEventListener('input', () => {
       });
     })
     .catch(() => {
-      // При ошибке сети или API просто скрываем подсказки
       suggestionsEl.innerHTML = '';
     });
 });
 
-/* ================== ADD CITY ================== */
+
+/* добавление города */
 
 document.getElementById('addCityBtn').addEventListener('click', () => {
   const index = cityInput.dataset.index;
@@ -251,7 +256,6 @@ document.getElementById('addCityBtn').addEventListener('click', () => {
 
   const match = lastSearchResults[index];
 
-  // Проверка на дубликат по name + country
   const exists = cities.some(
     c =>
       c.name.toLowerCase() === match.name.toLowerCase() &&
@@ -282,14 +286,14 @@ document.getElementById('addCityBtn').addEventListener('click', () => {
   addCitySection.style.display = 'none';
 });
 
-/* ================== TOGGLE ADD CITY ================== */
 
 toggleAddCityBtn.addEventListener('click', () => {
   addCitySection.style.display =
     addCitySection.style.display === 'none' ? 'block' : 'none';
 });
 
-/* ================== REFRESH ================== */
+
+/* обновление */
 
 document.getElementById('refreshBtn').addEventListener('click', () => {
   if (activeCity) loadWeather(activeCity);
