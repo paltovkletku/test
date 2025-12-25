@@ -18,14 +18,19 @@ function saveToStorage() {
 }
 
 function loadFromStorage() {
-  const saved = localStorage.getItem('cities');
+  try {
+    const saved = localStorage.getItem('cities');
 
-  if (saved) {
-    cities = JSON.parse(saved);
-    activeCity = cities[0];
-    renderCities();
-    loadWeather(activeCity);
-  } else {
+    if (saved) {
+      cities = JSON.parse(saved);
+      activeCity = cities[0];
+      renderCities();
+      loadWeather(activeCity);
+    } else {
+      requestGeolocation();
+    }
+  } catch (error) {
+    console.error('Failed to load from localStorage:', error);
     requestGeolocation();
   }
 }
@@ -124,8 +129,18 @@ function loadWeather(city) {
   fetch(
     `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`
   )
-    .then(res => res.json())
-    .then(data => renderWeather(data))
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`Weather API error: ${res.status}`);
+      }
+      return res.json();
+    })
+    .then(data => {
+      if (!data.daily || !data.daily.time) {
+        throw new Error('Invalid data from weather API');
+      }
+      renderWeather(data);
+    })
     .catch(() => {
       weatherEl.innerHTML = '<p class="error">Error loading weather</p>';
     });
@@ -173,9 +188,17 @@ cityInput.addEventListener('input', () => {
   if (value.length < 2) return;
 
   fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${value}&count=5`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`Geocoding API error: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(data => {
-      if (!data.results) return;
+      if (!data.results) {
+        // Город не найден - просто скрываем подсказки
+        return;
+      }
 
       lastSearchResults = data.results;
 
@@ -191,6 +214,10 @@ cityInput.addEventListener('input', () => {
 
         suggestionsEl.appendChild(li);
       });
+    })
+    .catch(() => {
+      // При ошибке сети или API просто скрываем подсказки
+      suggestionsEl.innerHTML = '';
     });
 });
 
