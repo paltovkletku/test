@@ -9,113 +9,188 @@ body {
   color: #03396c;
 }
 
+/* ================= HEADER ================= */
+
 header {
   background: #1e90ff;
   color: white;
-  padding: 15px;
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 22px;
 }
 
 header button {
   background: white;
   color: #1e90ff;
   border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 15px;
   cursor: pointer;
 }
+
+/* ================= MAIN ================= */
 
 main {
-  padding: 15px;
+  padding: 16px;
 }
 
-#cities button {
-  margin: 5px 5px 0 0;
-  padding: 6px 10px;
-  border: 1px solid #1e90ff;
-  background: #f0f8ff;
-  border-radius: 4px;
-  cursor: pointer;
-}
+/* ================= CITIES ================= */
 
-#cities button.active {
-  background: #1e90ff;
-  color: white;
+#cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
 }
-
-#weather {
-  background: white;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.day {
-  border-top: 1px solid #ddd;
-  padding-top: 10px;
-  margin-top: 10px;
-}
-
-#add-city {
-  margin-top: 20px;
-}
-
-#add-city input {
-  padding: 8px;
-  width: 100%;
-  max-width: 300px;
-}
-
-#add-city button {
-  margin-top: 10px;
-  padding: 8px 12px;
-  background: #1e90ff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-}
-
-#cityError {
-  color: red;
-  font-size: 14px;
-}
-
-@media (max-width: 600px) {
-  header {
-    flex-direction: column;
-    gap: 10px;
-  }
-}
-
 
 .city-item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 10px 14px;
+  background: #f0f8ff;
+  border: 1px solid #1e90ff;
+  border-radius: 10px;
+
+  min-width: 160px;
 }
 
 .city-item span {
   cursor: pointer;
+  font-size: 16px;
+  flex-grow: 1;
+}
+
+.city-item span:hover {
+  text-decoration: underline;
 }
 
 .city-item button {
   background: transparent;
   border: none;
-  color: red;
-  font-size: 14px;
+  color: #cc0000;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ================= WEATHER ================= */
+
+#weather {
+  background: white;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+#weather h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.day {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.day p {
+  margin: 4px 0;
+  font-size: 15px;
+}
+
+/* ================= ADD CITY ================= */
+
+#add-city {
+  margin-top: 24px;
+}
+
+#add-city h3 {
+  margin-bottom: 8px;
+}
+
+#add-city input {
+  width: 100%;
+  max-width: 320px;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+#add-city button {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #1e90ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
   cursor: pointer;
 }
 
-/* Mobile */
+#cityError {
+  margin-top: 6px;
+  color: red;
+  font-size: 14px;
+}
+
+/* ================= MOBILE ================= */
+
 @media (max-width: 600px) {
-  #cities {
-    display: flex;
-    flex-direction: column;
+
+  body {
+    font-size: 16px;
   }
 
-  #cities .city-item {
+  header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    text-align: center;
+  }
+
+  header button {
     width: 100%;
+    font-size: 16px;
+  }
+
+  #cities {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .city-item {
+    width: 100%;
+    font-size: 18px;
+    padding: 14px;
+  }
+
+  .city-item span {
+    font-size: 18px;
+  }
+
+  #weather {
+    margin-top: 16px;
+    padding: 16px;
+  }
+
+  .day {
+    font-size: 16px;
+  }
+
+  #add-city input,
+  #add-city button {
+    width: 100%;
+    font-size: 16px;
   }
 }
