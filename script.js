@@ -218,8 +218,13 @@ document.getElementById('addCityBtn').addEventListener('click', () => {
     return;
   }
 
-  // Проверка на повтор
-  const exists = cities.some(c => c.name.toLowerCase() === match.name.toLowerCase());
+  // Проверка на повтор по имени + стране
+  const exists = cities.some(
+    c =>
+      c.name.toLowerCase() === match.name.toLowerCase() &&
+      c.country?.toLowerCase() === match.country?.toLowerCase()
+  );
+
   if (exists) {
     cityError.textContent = 'City already added';
     return;
@@ -227,6 +232,7 @@ document.getElementById('addCityBtn').addEventListener('click', () => {
 
   const city = {
     name: match.name,
+    country: match.country, // сохраняем страну
     lat: match.latitude,
     lon: match.longitude
   };
