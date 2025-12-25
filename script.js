@@ -149,9 +149,27 @@ function loadWeather(city) {
 function renderWeather(data) {
   let html = `<h2>${activeCity.country ? activeCity.name + ', ' + activeCity.country : activeCity.name}</h2>`;
 
+  // Получаем сегодняшнюю дату
+  const today = new Date();
+  
   for (let i = 0; i < 3; i++) {
-    const dayTitle =
-      i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : 'Day after tomorrow';
+    // Создаем дату для каждого дня
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    
+    // Форматируем дату
+    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
+    const dayMonth = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+    
+    // Определяем заголовок
+    let dayTitle;
+    if (i === 0) {
+      dayTitle = `Today, ${dayMonth}`;
+    } else if (i === 1) {
+      dayTitle = `Tomorrow, ${dayMonth}`;
+    } else {
+      dayTitle = `${dayOfWeek}, ${dayMonth}`;
+    }
 
     html += `
       <div class="day">
