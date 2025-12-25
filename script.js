@@ -11,9 +11,7 @@ const toggleAddCityBtn = document.getElementById('toggleAddCity');
 
 let lastSearchResults = [];
 
-
-
-/* хранилище */
+/* ================== STORAGE ================== */
 
 function saveToStorage() {
   localStorage.setItem('cities', JSON.stringify(cities));
@@ -32,9 +30,7 @@ function loadFromStorage() {
   }
 }
 
-
-
-/* геолокация */
+/* ================== GEOLOCATION ================== */
 
 function requestGeolocation() {
   if (!navigator.geolocation) {
@@ -64,9 +60,7 @@ function requestGeolocation() {
   );
 }
 
-
-
-/* города */
+/* ================== CITIES ================== */
 
 function renderCities() {
   citiesEl.innerHTML = '';
@@ -76,7 +70,8 @@ function renderCities() {
     wrapper.className = 'city-item';
 
     const name = document.createElement('span');
-    name.textContent = city.name;
+    // Показываем name + country если есть
+    name.textContent = city.country ? `${city.name}, ${city.country}` : city.name;
 
     if (city === activeCity) {
       name.style.fontWeight = 'bold';
@@ -109,11 +104,8 @@ function renderCities() {
   });
 }
 
+/* ================== WEATHER ================== */
 
-
-/* погода*/
-
-/* код погоды в описание */
 function getWeatherDescription(code) {
   if (code === 0) return 'Clear sky ☀️';
   if (code <= 3) return 'Partly cloudy ⛅';
@@ -125,7 +117,6 @@ function getWeatherDescription(code) {
   if (code <= 99) return 'Thunderstorm ⛈️';
   return 'Unknown';
 }
-
 
 function loadWeather(city) {
   weatherEl.innerHTML = '<p class="loader">Loading...</p>';
@@ -140,9 +131,8 @@ function loadWeather(city) {
     });
 }
 
-
 function renderWeather(data) {
-  let html = `<h2>${activeCity.name}</h2>`;
+  let html = `<h2>${activeCity.country ? activeCity.name + ', ' + activeCity.country : activeCity.name}</h2>`;
 
   for (let i = 0; i < 3; i++) {
     const dayTitle =
@@ -173,8 +163,7 @@ function renderWeather(data) {
   weatherEl.innerHTML = html;
 }
 
-
-/* выпадающий список городов */
+/* ================== CITY SUGGESTIONS ================== */
 
 cityInput.addEventListener('input', () => {
   const value = cityInput.value.trim();
@@ -190,35 +179,34 @@ cityInput.addEventListener('input', () => {
 
       lastSearchResults = data.results;
 
-      data.results.forEach(city => {
+      data.results.forEach((city, i) => {
         const li = document.createElement('li');
         li.textContent = `${city.name}, ${city.country}`;
+
         li.onclick = () => {
-          cityInput.value = city.name;
+          cityInput.dataset.index = i; // сохраняем индекс выбранного города
+          cityInput.value = `${city.name}, ${city.country}`;
           suggestionsEl.innerHTML = '';
         };
+
         suggestionsEl.appendChild(li);
       });
     });
 });
 
-
-
-/* добавить город */
+/* ================== ADD CITY ================== */
 
 document.getElementById('addCityBtn').addEventListener('click', () => {
-  const name = cityInput.value.trim();
+  const index = cityInput.dataset.index;
 
-  const match = lastSearchResults.find(
-    c => c.name.toLowerCase() === name.toLowerCase()
-  );
-
-  if (!match) {
+  if (index === undefined) {
     cityError.textContent = 'Select city from the list';
     return;
   }
 
-  // Проверка на повтор по имени + стране
+  const match = lastSearchResults[index];
+
+  // Проверка на дубликат по name + country
   const exists = cities.some(
     c =>
       c.name.toLowerCase() === match.name.toLowerCase() &&
@@ -232,7 +220,7 @@ document.getElementById('addCityBtn').addEventListener('click', () => {
 
   const city = {
     name: match.name,
-    country: match.country, // сохраняем страну
+    country: match.country,
     lat: match.latitude,
     lon: match.longitude
   };
@@ -244,19 +232,22 @@ document.getElementById('addCityBtn').addEventListener('click', () => {
   loadWeather(city);
 
   cityInput.value = '';
+  cityInput.dataset.index = undefined;
   suggestionsEl.innerHTML = '';
   addCitySection.style.display = 'none';
 });
 
+/* ================== TOGGLE ADD CITY ================== */
 
 toggleAddCityBtn.addEventListener('click', () => {
   addCitySection.style.display =
     addCitySection.style.display === 'none' ? 'block' : 'none';
 });
 
+/* ================== REFRESH ================== */
+
 document.getElementById('refreshBtn').addEventListener('click', () => {
   if (activeCity) loadWeather(activeCity);
 });
-
 
 loadFromStorage();
