@@ -8,8 +8,8 @@
 body {
   margin: 0;
   background: 
-    linear-gradient(rgba(200, 200, 200, 0.9), rgba(200, 200, 200, 0.9)),
-    url('https://images.wallpapersden.com/image/download/clouds-4k_a2xqbGuUmZqaraWkpJRpaWxprWdqZmw.jpg');
+    linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
+    url('https://img.freepik.com/free-photo/aerial-view-large-cumulus-clouds-air_181624-14779.jpg?semt=ais_hybrid&w=740&q=80');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
