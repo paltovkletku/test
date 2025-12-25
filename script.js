@@ -157,22 +157,28 @@ function loadWeather(city) {
 function renderWeather(data) {
   let html = `<h2>${activeCity.country ? activeCity.name + ', ' + activeCity.country : activeCity.name}</h2>`;
 
-  const today = new Date();
+  // API возвращает: data.daily.time[0] = "2024-12-26" (сегодня в городе)
+  //                 data.daily.time[1] = "2024-12-27" (завтра в городе)
+  //                 data.daily.time[2] = "2024-12-28" (послезавтра в городе)
   
   for (let i = 0; i < 3; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
+    // Берем дату из API
+    const apiDateStr = data.daily.time[i]; // "2024-12-26"
+    const [year, month, day] = apiDateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     
+    // Форматируем красиво
     const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
     const dayMonth = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
     
+    // Просто: первый день - Today, второй - Tomorrow, третий - Day of week
     let dayTitle;
     if (i === 0) {
       dayTitle = `Today, ${dayMonth}`;
     } else if (i === 1) {
       dayTitle = `Tomorrow, ${dayMonth}`;
     } else {
-      dayTitle = `${dayOfWeek}, ${dayMonth}`;
+      dayTitle = `${dayOfWeek}, ${dayMonth}`; // "Fri, 28 Dec"
     }
 
     html += `
@@ -199,7 +205,6 @@ function renderWeather(data) {
 
   weatherEl.innerHTML = html;
 }
-
 
 
 /* выпадающий список городов */
