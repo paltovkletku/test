@@ -130,22 +130,39 @@ function loadWeather(city) {
     });
 }
 
+
 function renderWeather(data) {
   let html = `<h2>${activeCity.name}</h2>`;
 
   for (let i = 0; i < 3; i++) {
+    const dayTitle =
+      i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : 'Day after tomorrow';
+
     html += `
       <div class="day">
-        <p><strong>${i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : 'Day after tomorrow'}</strong></p>
-        <p>Weather:</p><p>${getWeatherDescription(data.daily.weathercode[i])}</p>
-        <p>Max:</p><p>${data.daily.temperature_2m_max[i]} °C</p>
-        <p>Min:</p><p>${data.daily.temperature_2m_min[i]} °C</p>
+        <div class="day-title">${dayTitle}</div>
+
+        <div class="row">
+          <span>Weather</span>
+          <span>${getWeatherDescription(data.daily.weathercode[i])}</span>
+        </div>
+
+        <div class="row">
+          <span>Max</span>
+          <span>${data.daily.temperature_2m_max[i]} °C</span>
+        </div>
+
+        <div class="row">
+          <span>Min</span>
+          <span>${data.daily.temperature_2m_min[i]} °C</span>
+        </div>
       </div>
     `;
   }
 
   weatherEl.innerHTML = html;
 }
+
 
 /* ================= AUTOCOMPLETE ================= */
 
