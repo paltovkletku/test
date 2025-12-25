@@ -53,31 +53,69 @@ function requestGeolocation() {
   );
 }
 
+
+
 function renderCities() {
   citiesEl.innerHTML = '';
 
-  cities.forEach(city => {
-    const btn = document.createElement('button');
-    btn.textContent = city.name;
+  cities.forEach((city, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'city-item';
+
+    const name = document.createElement('span');
+    name.textContent = city.name;
 
     if (city === activeCity) {
-      btn.classList.add('active');
+      name.style.fontWeight = 'bold';
     }
 
-    btn.onclick = () => {
+    name.onclick = () => {
       activeCity = city;
       renderCities();
       loadWeather(city);
     };
 
-    citiesEl.appendChild(btn);
+    wrapper.appendChild(name);
+
+    if (city.name !== 'Current location') {
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = '×';
+
+      removeBtn.onclick = () => {
+        cities.splice(index, 1);
+
+        if (activeCity === city) {
+          activeCity = cities[0] || null;
+          if (activeCity) loadWeather(activeCity);
+        }
+
+        saveToStorage();
+        renderCities();
+      };
+
+      wrapper.appendChild(removeBtn);
+    }
+
+    citiesEl.appendChild(wrapper);
   });
+}
+
+function getWeatherDescription(code) {
+  if (code === 0) return 'Clear sky';
+  if (code <= 3) return 'Partly cloudy';
+  if (code <= 48) return 'Fog';
+  if (code <= 57) return 'Drizzle';
+  if (code <= 67) return 'Rain';
+  if (code <= 77) return 'Snow';
+  if (code <= 82) return 'Rain showers';
+  if (code <= 99) return 'Thunderstorm';
+  return 'Unknown';
 }
 
 function loadWeather(city) {
   weatherEl.innerHTML = '<p>Loading...</p>';
 
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
 
   fetch(url)
     .then(res => res.json())
@@ -101,14 +139,15 @@ function renderWeather(data) {
   let html = `<h2>${activeCity.name}</h2>`;
 
   for (let i = 0; i < 3; i++) {
-    html += `
-      <div class="day">
-        <p><strong>${getDayLabel(i, data.daily.time[i])}</strong></p>
-        <p>Max: ${data.daily.temperature_2m_max[i]} °C</p>
-        <p>Min: ${data.daily.temperature_2m_min[i]} °C</p>
-      </div>
-    `;
-  }
+  html += `
+    <div class="day">
+      <p><strong>${getDayLabel(i, data.daily.time[i])}</strong></p>
+      <p>Weather: ${getWeatherDescription(data.daily.weathercode[i])}</p>
+      <p>Max: ${data.daily.temperature_2m_max[i]} °C</p>
+      <p>Min: ${data.daily.temperature_2m_min[i]} °C</p>
+    </div>
+  `;
+}
 
   weatherEl.innerHTML = html;
 }
