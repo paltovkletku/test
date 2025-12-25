@@ -11,7 +11,9 @@ const toggleAddCityBtn = document.getElementById('toggleAddCity');
 
 let lastSearchResults = [];
 
-/* ================= STORAGE ================= */
+
+
+/* хранилище */
 
 function saveToStorage() {
   localStorage.setItem('cities', JSON.stringify(cities));
@@ -30,7 +32,9 @@ function loadFromStorage() {
   }
 }
 
-/* ================= GEOLOCATION ================= */
+
+
+/* геолокация */
 
 function requestGeolocation() {
   if (!navigator.geolocation) {
@@ -60,7 +64,9 @@ function requestGeolocation() {
   );
 }
 
-/* ================= CITIES ================= */
+
+
+/* города */
 
 function renderCities() {
   citiesEl.innerHTML = '';
@@ -103,8 +109,11 @@ function renderCities() {
   });
 }
 
-/* ================= WEATHER ================= */
 
+
+/* погода*/
+
+/* код погоды в описание */
 function getWeatherDescription(code) {
   if (code === 0) return 'Clear sky';
   if (code <= 3) return 'Partly cloudy';
@@ -116,6 +125,7 @@ function getWeatherDescription(code) {
   if (code <= 99) return 'Thunderstorm';
   return 'Unknown';
 }
+
 
 function loadWeather(city) {
   weatherEl.innerHTML = '<p class="loader">Loading...</p>';
@@ -164,7 +174,7 @@ function renderWeather(data) {
 }
 
 
-/* ================= AUTOCOMPLETE ================= */
+/* выпадающий список городов */
 
 cityInput.addEventListener('input', () => {
   const value = cityInput.value.trim();
@@ -192,7 +202,9 @@ cityInput.addEventListener('input', () => {
     });
 });
 
-/* ================= ADD CITY ================= */
+
+
+/* добавить город */
 
 document.getElementById('addCityBtn').addEventListener('click', () => {
   const name = cityInput.value.trim();
@@ -223,7 +235,6 @@ document.getElementById('addCityBtn').addEventListener('click', () => {
   addCitySection.style.display = 'none';
 });
 
-/* ================= UI ================= */
 
 toggleAddCityBtn.addEventListener('click', () => {
   addCitySection.style.display =
@@ -234,6 +245,5 @@ document.getElementById('refreshBtn').addEventListener('click', () => {
   if (activeCity) loadWeather(activeCity);
 });
 
-/* ================= INIT ================= */
 
 loadFromStorage();
