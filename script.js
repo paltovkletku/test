@@ -218,6 +218,13 @@ document.getElementById('addCityBtn').addEventListener('click', () => {
     return;
   }
 
+  // Проверка на повтор
+  const exists = cities.some(c => c.name.toLowerCase() === match.name.toLowerCase());
+  if (exists) {
+    cityError.textContent = 'City already added';
+    return;
+  }
+
   const city = {
     name: match.name,
     lat: match.latitude,
