@@ -1,33 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
 * {
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
 }
 
 body {
   margin: 0;
-  background: #f2f2f2;
-  color: #333;
+  background: #eef2f7;
+  color: #2e3440;
 }
+
+/* ===== Header ===== */
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  background: #2196f3;
+  padding: 14px 18px;
+  background: #5b8def;
   color: white;
+}
+
+.header h1 {
+  font-size: 20px;
+  margin: 0;
 }
 
 .header button {
   background: white;
   border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
+  padding: 6px 14px;
+  border-radius: 6px;
   cursor: pointer;
+  color: #5b8def;
+  font-weight: 500;
 }
 
+/* ===== App ===== */
+
 .app {
-  padding: 12px;
+  padding: 14px;
   max-width: 900px;
   margin: 0 auto;
 }
@@ -38,17 +51,22 @@ body {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .city-item {
   background: white;
-  padding: 6px 10px;
-  border-radius: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.city-item span {
+  white-space: nowrap;
 }
 
 .city-item button {
@@ -56,33 +74,41 @@ body {
   background: transparent;
   font-size: 16px;
   cursor: pointer;
+  color: #888;
 }
 
 /* ===== Toggle button ===== */
 
 #toggleAddCity {
-  margin-bottom: 12px;
-  padding: 6px 10px;
+  margin-bottom: 14px;
+  padding: 7px 12px;
   background: transparent;
-  border: 1px solid #2196f3;
-  color: #2196f3;
-  border-radius: 4px;
+  border: 1px solid #5b8def;
+  color: #5b8def;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: 500;
 }
 
 /* ===== Weather ===== */
 
 .weather {
   background: white;
-  border-radius: 6px;
-  padding: 12px;
+  border-radius: 10px;
+  padding: 14px;
   margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
+.weather h2 {
+  margin-top: 0;
+}
+
+/* ===== Day ===== */
 
 .day {
-  border-top: 1px solid #ddd;
-  padding: 8px 0;
+  border-top: 1px solid #e2e8f0;
+  padding: 10px 0;
 }
 
 .day:first-child {
@@ -90,23 +116,37 @@ body {
 }
 
 .day-title {
-  font-weight: bold;
+  font-weight: 600;
   margin-bottom: 6px;
 }
+
+/* ===== Rows ===== */
 
 .row {
   display: flex;
   justify-content: space-between;
-  padding: 2px 0;
+  padding: 3px 0;
+  font-size: 14px;
+}
+
+.row span:last-child {
+  font-weight: 500;
 }
 
 /* ===== Add city ===== */
 
 .add-city {
   background: white;
-  padding: 12px;
-  border-radius: 6px;
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
+
+.add-city h3 {
+  margin-top: 0;
+}
+
+/* ===== Input ===== */
 
 .input-wrapper {
   position: relative;
@@ -114,28 +154,35 @@ body {
 
 input {
   width: 100%;
-  padding: 8px;
+  padding: 9px;
   margin-bottom: 4px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 14px;
 }
+
+input:focus {
+  outline: none;
+  border-color: #5b8def;
+}
+
+/* ===== Add button ===== */
 
 .add-city button {
   width: 100%;
-  margin-top: 8px;
-  padding: 10px;
-  background: #2196f3;
+  margin-top: 10px;
+  padding: 11px;
+  background: #5b8def;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .add-city button:hover {
-  background: #1976d2;
-}
-
-.add-city button:active {
-  transform: scale(0.98);
+  background: #4a7ce0;
 }
 
 /* ===== Autocomplete ===== */
@@ -147,29 +194,32 @@ input {
   position: absolute;
   width: 100%;
   background: white;
-  border: 1px solid #ccc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
   max-height: 150px;
   overflow-y: auto;
   z-index: 10;
 }
 
 .suggestions li {
-  padding: 6px;
+  padding: 8px;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .suggestions li:hover {
-  background: #eee;
+  background: #eef2f7;
 }
 
 /* ===== States ===== */
 
 .loader {
   text-align: center;
+  color: #5b8def;
 }
 
 .error {
-  color: red;
+  color: #d14343;
   font-size: 14px;
   margin: 4px 0;
 }
