@@ -6,6 +6,11 @@ const weatherEl = document.getElementById('weather');
 const cityInput = document.getElementById('cityInput');
 const cityError = document.getElementById('cityError');
 const addCitySection = document.getElementById('add-city');
+const suggestionsEl = document.getElementById('suggestions');
+
+let lastSearchResults = [];
+
+/* ===================== STORAGE ===================== */
 
 function saveToStorage() {
   localStorage.setItem('cities', JSON.stringify(cities));
@@ -24,6 +29,8 @@ function loadFromStorage() {
     requestGeolocation();
   }
 }
+
+/* ===================== GEOLOCATION ===================== */
 
 function requestGeolocation() {
   if (!navigator.geolocation) {
@@ -48,12 +55,13 @@ function requestGeolocation() {
     },
     () => {
       addCitySection.style.display = 'block';
-      weatherEl.innerHTML = '<p>Please add a city using the form below or provide access to geographic data to check the weather</p>';
+      weatherEl.innerHTML =
+        '<p>Please add a city using the form below or allow geolocation access</p>';
     }
   );
 }
 
-
+/* ===================== CITIES LIST ===================== */
 
 function renderCities() {
   citiesEl.innerHTML = '';
@@ -100,6 +108,8 @@ function renderCities() {
   });
 }
 
+/* ===================== WEATHER ===================== */
+
 function getWeatherDescription(code) {
   if (code === 0) return 'Clear sky';
   if (code <= 3) return 'Partly cloudy';
@@ -113,7 +123,7 @@ function getWeatherDescription(code) {
 }
 
 function loadWeather(city) {
-  weatherEl.innerHTML = '<p>Loading...</p>';
+  weatherEl.innerHTML = '<p class="loader">Loading...</p>';
 
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
 
@@ -121,14 +131,17 @@ function loadWeather(city) {
     .then(res => res.json())
     .then(data => renderWeather(data))
     .catch(() => {
-      weatherEl.innerHTML = '<p>Error loading weather</p>';
+      weatherEl.innerHTML = '<p class="error">Error loading weather</p>';
     });
 }
 
 function getDayLabel(index, dateStr) {
   const date = new Date(dateStr);
-  const options = { weekday: 'short', day: '2-digit', month: '2-digit' };
-  const formatted = date.toLocaleDateString('en-US', options);
+  const formatted = date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit'
+  });
 
   if (index === 0) return `Today (${formatted})`;
   if (index === 1) return `Tomorrow (${formatted})`;
@@ -139,55 +152,86 @@ function renderWeather(data) {
   let html = `<h2>${activeCity.name}</h2>`;
 
   for (let i = 0; i < 3; i++) {
-  html += `
-    <div class="day">
-      <p><strong>${getDayLabel(i, data.daily.time[i])}</strong></p>
-      <p>Weather: ${getWeatherDescription(data.daily.weathercode[i])}</p>
-      <p>Max: ${data.daily.temperature_2m_max[i]} °C</p>
-      <p>Min: ${data.daily.temperature_2m_min[i]} °C</p>
-    </div>
-  `;
-}
+    html += `
+      <div class="day">
+        <p><strong>${getDayLabel(i, data.daily.time[i])}</strong></p>
+        <p>Weather: ${getWeatherDescription(data.daily.weathercode[i])}</p>
+        <p>Max: ${data.daily.temperature_2m_max[i]} °C</p>
+        <p>Min: ${data.daily.temperature_2m_min[i]} °C</p>
+      </div>
+    `;
+  }
 
   weatherEl.innerHTML = html;
 }
+
+/* ===================== AUTOCOMPLETE ===================== */
+
+cityInput.addEventListener('input', () => {
+  const value = cityInput.value.trim();
+  suggestionsEl.innerHTML = '';
+  cityError.textContent = '';
+
+  if (value.length < 2) return;
+
+  fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${value}&count=5`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.results) return;
+
+      lastSearchResults = data.results;
+
+      data.results.forEach(city => {
+        const li = document.createElement('li');
+        li.textContent = `${city.name}, ${city.country}`;
+        li.onclick = () => {
+          cityInput.value = city.name;
+          suggestionsEl.innerHTML = '';
+        };
+        suggestionsEl.appendChild(li);
+      });
+    });
+});
+
+/* ===================== ADD CITY ===================== */
 
 document.getElementById('addCityBtn').addEventListener('click', () => {
   const name = cityInput.value.trim();
   cityError.textContent = '';
 
-  if (!name) {
-    cityError.textContent = 'Enter city name';
+  const match = lastSearchResults.find(
+    c => c.name.toLowerCase() === name.toLowerCase()
+  );
+
+  if (!match) {
+    cityError.textContent = 'Select city from the list';
     return;
   }
 
-  fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${name}`)
-    .then(res => res.json())
-    .then(data => {
-      if (!data.results) {
-        cityError.textContent = 'City not found';
-        return;
-      }
+  const city = {
+    name: match.name,
+    lat: match.latitude,
+    lon: match.longitude
+  };
 
-      const city = {
-        name: data.results[0].name,
-        lat: data.results[0].latitude,
-        lon: data.results[0].longitude
-      };
+  cities.push(city);
+  activeCity = city;
+  saveToStorage();
+  renderCities();
+  loadWeather(city);
 
-      cities.push(city);
-      activeCity = city;
-      saveToStorage();
-      renderCities();
-      loadWeather(city);
-      cityInput.value = '';
-    });
+  cityInput.value = '';
+  suggestionsEl.innerHTML = '';
 });
+
+/* ===================== REFRESH ===================== */
 
 document.getElementById('refreshBtn').addEventListener('click', () => {
   if (activeCity) {
     loadWeather(activeCity);
   }
 });
+
+/* ===================== INIT ===================== */
 
 loadFromStorage();
