@@ -1,32 +1,32 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Прогноз погоды</title>
+  <title>Weather Forecast</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <header>
-    <h1>Прогноз погоды</h1>
-    <button id="refreshBtn">Обновить</button>
-  </header>
+<header>
+  <h1>Weather Forecast</h1>
+  <button id="refreshBtn">Refresh</button>
+</header>
 
-  <main>
-    <section id="cities"></section>
+<main>
+  <section id="cities"></section>
 
-    <section id="weather">
-      <p>Выберите город</p>
-    </section>
+  <section id="weather">
+    <p>Loading...</p>
+  </section>
 
-    <section id="add-city">
-      <h3>Добавить город</h3>
-      <input type="text" id="cityInput" placeholder="Введите город">
-      <p id="cityError"></p>
-      <button id="addCityBtn">Добавить</button>
-    </section>
-  </main>
+  <section id="add-city" style="display: none;">
+    <h3>Add city</h3>
+    <input type="text" id="cityInput" placeholder="Enter city name">
+    <p id="cityError"></p>
+    <button id="addCityBtn">Add</button>
+  </section>
+</main>
 
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
