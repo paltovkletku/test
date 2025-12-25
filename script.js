@@ -48,7 +48,7 @@ function requestGeolocation() {
     },
     () => {
       addCitySection.style.display = 'block';
-      weatherEl.innerHTML = '<p>Please add a city</p>';
+      weatherEl.innerHTML = '<p>Please add a city using the form below or provide access to geographic data to check the weather</p>';
     }
   );
 }
