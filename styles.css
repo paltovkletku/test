@@ -88,3 +88,34 @@ main {
     gap: 10px;
   }
 }
+
+
+.city-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.city-item span {
+  cursor: pointer;
+}
+
+.city-item button {
+  background: transparent;
+  border: none;
+  color: red;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  #cities {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #cities .city-item {
+    width: 100%;
+  }
+}
