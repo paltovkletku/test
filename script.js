@@ -115,14 +115,14 @@ function renderCities() {
 
 /* код погоды в описание */
 function getWeatherDescription(code) {
-  if (code === 0) return 'Clear sky';
-  if (code <= 3) return 'Partly cloudy';
-  if (code <= 48) return 'Fog';
-  if (code <= 57) return 'Drizzle';
-  if (code <= 67) return 'Rain';
-  if (code <= 77) return 'Snow';
-  if (code <= 82) return 'Rain showers';
-  if (code <= 99) return 'Thunderstorm';
+  if (code === 0) return 'Clear sky ☀️';
+  if (code <= 3) return 'Partly cloudy ⛅';
+  if (code <= 48) return 'Fog 🌫️';
+  if (code <= 57) return 'Drizzle ☔';
+  if (code <= 67) return 'Rain 🌦️';
+  if (code <= 77) return 'Snow ❄️';
+  if (code <= 82) return 'Rain showers 🌧️';
+  if (code <= 99) return 'Thunderstorm ⛈️';
   return 'Unknown';
 }
 
@@ -158,12 +158,12 @@ function renderWeather(data) {
         </div>
 
         <div class="row">
-          <span>Max</span>
+          <span>Max temp</span>
           <span>${data.daily.temperature_2m_max[i]} °C</span>
         </div>
 
         <div class="row">
-          <span>Min</span>
+          <span>Min temp</span>
           <span>${data.daily.temperature_2m_min[i]} °C</span>
         </div>
       </div>
