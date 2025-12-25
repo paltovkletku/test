@@ -11,7 +11,6 @@ body {
   color: #2e3440;
 }
 
-/* ===== Header ===== */
 
 .header {
   display: flex;
@@ -37,7 +36,8 @@ body {
   font-weight: 500;
 }
 
-/* ===== App ===== */
+
+
 
 .app {
   padding: 14px;
@@ -45,7 +45,8 @@ body {
   margin: 0 auto;
 }
 
-/* ===== Cities ===== */
+
+
 
 .cities {
   display: flex;
@@ -77,7 +78,8 @@ body {
   color: #888;
 }
 
-/* ===== Toggle button ===== */
+
+
 
 #toggleAddCity {
   margin-bottom: 14px;
@@ -90,7 +92,8 @@ body {
   font-weight: 500;
 }
 
-/* ===== Weather ===== */
+
+
 
 .weather {
   background: white;
@@ -104,7 +107,8 @@ body {
   margin-top: 0;
 }
 
-/* ===== Day ===== */
+
+
 
 .day {
   border-top: 1px solid #e2e8f0;
@@ -120,7 +124,8 @@ body {
   margin-bottom: 6px;
 }
 
-/* ===== Rows ===== */
+
+
 
 .row {
   display: flex;
@@ -133,7 +138,8 @@ body {
   font-weight: 500;
 }
 
-/* ===== Add city ===== */
+
+
 
 .add-city {
   background: white;
@@ -146,7 +152,8 @@ body {
   margin-top: 0;
 }
 
-/* ===== Input ===== */
+
+
 
 .input-wrapper {
   position: relative;
@@ -166,7 +173,8 @@ input:focus {
   border-color: #5b8def;
 }
 
-/* ===== Add button ===== */
+
+
 
 .add-city button {
   width: 100%;
@@ -185,7 +193,8 @@ input:focus {
   background: #4a7ce0;
 }
 
-/* ===== Autocomplete ===== */
+
+
 
 .suggestions {
   list-style: none;
@@ -211,7 +220,8 @@ input:focus {
   background: #eef2f7;
 }
 
-/* ===== States ===== */
+
+
 
 .loader {
   text-align: center;
@@ -224,7 +234,8 @@ input:focus {
   margin: 4px 0;
 }
 
-/* ===== Desktop ===== */
+
+
 
 @media (min-width: 768px) {
   .app {
