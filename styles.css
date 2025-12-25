@@ -7,10 +7,15 @@
 
 body {
   margin: 0;
-  background: #eef2f7;
+  background: 
+    linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
+    url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: #2e3440;
+  min-height: 100vh;
 }
-
 
 .header {
   display: flex;
