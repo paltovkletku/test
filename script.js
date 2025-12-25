@@ -7,10 +7,11 @@ const cityInput = document.getElementById('cityInput');
 const cityError = document.getElementById('cityError');
 const addCitySection = document.getElementById('add-city');
 const suggestionsEl = document.getElementById('suggestions');
+const toggleAddCityBtn = document.getElementById('toggleAddCity');
 
 let lastSearchResults = [];
 
-/* ===================== STORAGE ===================== */
+/* ================= STORAGE ================= */
 
 function saveToStorage() {
   localStorage.setItem('cities', JSON.stringify(cities));
@@ -24,13 +25,12 @@ function loadFromStorage() {
     activeCity = cities[0];
     renderCities();
     loadWeather(activeCity);
-    addCitySection.style.display = 'block';
   } else {
     requestGeolocation();
   }
 }
 
-/* ===================== GEOLOCATION ===================== */
+/* ================= GEOLOCATION ================= */
 
 function requestGeolocation() {
   if (!navigator.geolocation) {
@@ -51,17 +51,16 @@ function requestGeolocation() {
       saveToStorage();
       renderCities();
       loadWeather(city);
-      addCitySection.style.display = 'block';
     },
     () => {
       addCitySection.style.display = 'block';
       weatherEl.innerHTML =
-        '<p>Please add a city using the form below or allow geolocation access</p>';
+        '<p>Please add a city or allow geolocation access</p>';
     }
   );
 }
 
-/* ===================== CITIES LIST ===================== */
+/* ================= CITIES ================= */
 
 function renderCities() {
   citiesEl.innerHTML = '';
@@ -91,14 +90,10 @@ function renderCities() {
 
       removeBtn.onclick = () => {
         cities.splice(index, 1);
-
-        if (activeCity === city) {
-          activeCity = cities[0] || null;
-          if (activeCity) loadWeather(activeCity);
-        }
-
+        activeCity = cities[0] || null;
         saveToStorage();
         renderCities();
+        if (activeCity) loadWeather(activeCity);
       };
 
       wrapper.appendChild(removeBtn);
@@ -108,7 +103,7 @@ function renderCities() {
   });
 }
 
-/* ===================== WEATHER ===================== */
+/* ================= WEATHER ================= */
 
 function getWeatherDescription(code) {
   if (code === 0) return 'Clear sky';
@@ -125,27 +120,14 @@ function getWeatherDescription(code) {
 function loadWeather(city) {
   weatherEl.innerHTML = '<p class="loader">Loading...</p>';
 
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`;
-
-  fetch(url)
+  fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`
+  )
     .then(res => res.json())
     .then(data => renderWeather(data))
     .catch(() => {
       weatherEl.innerHTML = '<p class="error">Error loading weather</p>';
     });
-}
-
-function getDayLabel(index, dateStr) {
-  const date = new Date(dateStr);
-  const formatted = date.toLocaleDateString('en-US', {
-    weekday: 'short',
-    day: '2-digit',
-    month: '2-digit'
-  });
-
-  if (index === 0) return `Today (${formatted})`;
-  if (index === 1) return `Tomorrow (${formatted})`;
-  return `Day after tomorrow (${formatted})`;
 }
 
 function renderWeather(data) {
@@ -154,10 +136,10 @@ function renderWeather(data) {
   for (let i = 0; i < 3; i++) {
     html += `
       <div class="day">
-        <p><strong>${getDayLabel(i, data.daily.time[i])}</strong></p>
-        <p>Weather: ${getWeatherDescription(data.daily.weathercode[i])}</p>
-        <p>Max: ${data.daily.temperature_2m_max[i]} °C</p>
-        <p>Min: ${data.daily.temperature_2m_min[i]} °C</p>
+        <p><strong>${i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : 'Day after tomorrow'}</strong></p>
+        <p>Weather:</p><p>${getWeatherDescription(data.daily.weathercode[i])}</p>
+        <p>Max:</p><p>${data.daily.temperature_2m_max[i]} °C</p>
+        <p>Min:</p><p>${data.daily.temperature_2m_min[i]} °C</p>
       </div>
     `;
   }
@@ -165,7 +147,7 @@ function renderWeather(data) {
   weatherEl.innerHTML = html;
 }
 
-/* ===================== AUTOCOMPLETE ===================== */
+/* ================= AUTOCOMPLETE ================= */
 
 cityInput.addEventListener('input', () => {
   const value = cityInput.value.trim();
@@ -193,11 +175,10 @@ cityInput.addEventListener('input', () => {
     });
 });
 
-/* ===================== ADD CITY ===================== */
+/* ================= ADD CITY ================= */
 
 document.getElementById('addCityBtn').addEventListener('click', () => {
   const name = cityInput.value.trim();
-  cityError.textContent = '';
 
   const match = lastSearchResults.find(
     c => c.name.toLowerCase() === name.toLowerCase()
@@ -222,16 +203,20 @@ document.getElementById('addCityBtn').addEventListener('click', () => {
 
   cityInput.value = '';
   suggestionsEl.innerHTML = '';
+  addCitySection.style.display = 'none';
 });
 
-/* ===================== REFRESH ===================== */
+/* ================= UI ================= */
+
+toggleAddCityBtn.addEventListener('click', () => {
+  addCitySection.style.display =
+    addCitySection.style.display === 'none' ? 'block' : 'none';
+});
 
 document.getElementById('refreshBtn').addEventListener('click', () => {
-  if (activeCity) {
-    loadWeather(activeCity);
-  }
+  if (activeCity) loadWeather(activeCity);
 });
 
-/* ===================== INIT ===================== */
+/* ================= INIT ================= */
 
 loadFromStorage();
